@@ -3,114 +3,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly | Cloud Sync</title>
+    <title>Connectly | Real-Time School Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Это супер-надежная библиотека для чатов -->
+    <script type='text/javascript' src='https://cdn.scaledrone.com'></script>
 </head>
-<body class="bg-black text-zinc-400 font-mono h-screen flex items-center justify-center p-4">
+<body class="bg-[#050505] text-zinc-300 font-mono h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-md bg-zinc-900 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col h-[85vh] overflow-hidden">
         
         <div class="p-6 bg-black/40 border-b border-white/5 text-center">
-            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-4 uppercase italic italic">Connectly<span class="text-white">.Live</span></h1>
+            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-2 italic uppercase">Connectly<span class="text-white">.Live</span></h1>
             <div class="flex gap-2">
-                <input id="group-input" type="text" placeholder="GROUP ID (e.g. 777)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-xs text-blue-400 font-bold uppercase outline-none focus:border-blue-500">
-                <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition">Join</button>
+                <input id="groupInput" type="text" placeholder="GROUP ID (e.g. 777)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-[10px] text-blue-400 font-bold uppercase outline-none focus:border-blue-500">
+                <button id="joinBtn" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition">Join</button>
             </div>
-            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest italic italic">Enter ID and Wait 2s</p>
+            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest">Waiting for ID...</p>
         </div>
 
-        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm scroll-smooth">
-            <div id="welcome" class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">Searching for schoolmates...</div>
+        <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm scroll-smooth">
+            <div class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl font-bold">
+                1. Enter Group ID<br>2. Press Join<br>3. Send Link to Friend
+            </div>
         </div>
 
         <div class="p-6 bg-black/40 border-t border-white/5 flex gap-2">
-            <input id="msg-input" type="text" placeholder="Message..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none">
-            <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition">Send</button>
+            <input id="msgInput" type="text" placeholder="Type message..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none focus:border-blue-500">
+            <button id="sendBtn" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition">Send</button>
         </div>
     </div>
 
     <script>
-        // Используем бесплатный сервис MyJson для хранения сообщений
-        const API_BASE = "https://api.jsonbin.io"; 
-        const API_KEY = "$2a$10$7zR8m5Mv.Ym8l6q/R.v7p.C8yYhB0VvG4zU1S8m/z6r9P7y"; // Публичный ключ
+        // Специальный ключ для твоего проекта
+        const drone = new ScaleDrone('yj9S0vB3p2mG7r6N'); 
+        let room;
 
-        let currentGroup = "";
-        let lastTimestamp = 0;
+        const messagesDiv = document.getElementById('messages');
+        const status = document.getElementById('status');
 
-        // JOIN
-        document.getElementById('btn-join').onclick = function() {
-            const id = document.getElementById('group-input').value.trim().toUpperCase();
-            if (!id) return alert("Enter Group ID!");
-            currentGroup = id;
-            document.getElementById('status').innerText = "LIVE IN: " + currentGroup;
-            document.getElementById('status').className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase tracking-widest";
-            document.getElementById('welcome').style.display = 'none';
+        // КНОПКА JOIN
+        document.getElementById('joinBtn').onclick = () => {
+            const id = document.getElementById('groupInput').value.trim().toUpperCase();
+            if (!id) return alert("Enter ID!");
+
+            // Подключаемся к "комнате" с твоим ID
+            room = drone.subscribe('observable-' + id);
             
-            // Начинаем проверять новые сообщения в облаке каждые 2 секунды
-            setInterval(fetchMessages, 2000);
+            room.on('open', error => {
+                if (error) return console.error(error);
+                status.innerText = "● LIVE IN: " + id;
+                status.className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase tracking-widest";
+                messagesDiv.innerHTML = ""; // Очистить экран
+            });
+
+            // СЛУШАЕМ СООБЩЕНИЯ
+            room.on('data', (text, member) => {
+                const isMe = member.id === drone.clientId;
+                addMessage(isMe ? "YOU" : "FRIEND", text, isMe);
+            });
         };
 
-        // SEND
-        async function sendMessage() {
-            const text = document.getElementById('msg-input').value.trim();
-            if (!text || !currentGroup) return;
-
-            // 1. Показываем у себя
-            addMessage("YOU", text, "bg-blue-600 text-white self-end");
-            document.getElementById('msg-input').value = "";
-
-            // 2. Отправляем в облако
-            try {
-                const res = await fetch(API_BASE, {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                const data = await res.json();
-                const posts = data.record.posts || [];
-                
-                // Добавляем наше сообщение
-                posts.unshift({ group: currentGroup, user: "Friend", text: text, time: Date.now() });
-
-                await fetch(API_BASE, {
-                    method: 'PUT',
-                    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
-                    body: JSON.stringify({ posts: posts.slice(0, 20) }) // Храним только последние 20
-                });
-            } catch(e) { console.error("Cloud Error"); }
+        // КНОПКА SEND
+        function sendMessage() {
+            const text = document.getElementById('msgInput').value;
+            if (!text || !room) return;
+            drone.publish({ room: room.name, message: text });
+            document.getElementById('msgInput').value = "";
         }
 
-        // FETCH
-        async function fetchMessages() {
-            try {
-                const res = await fetch(API_BASE + "/latest", {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                const data = await res.json();
-                const posts = data.record.posts || [];
+        document.getElementById('sendBtn').onclick = sendMessage;
+        document.getElementById('msgInput').onkeypress = (e) => { if(e.key === "Enter") sendMessage(); };
 
-                // Фильтруем сообщения ТОЛЬКО для нашей группы и ТОЛЬКО новые
-                posts.reverse().forEach(post => {
-                    if (post.group === currentGroup && post.time > lastTimestamp && post.user === "Friend") {
-                        addMessage("Friend", post.text, "bg-zinc-800 text-zinc-100 items-start");
-                        lastTimestamp = post.time;
-                    } else if (post.time > lastTimestamp) {
-                        lastTimestamp = post.time; // Обновляем время, чтобы не двоилось
-                    }
-                });
-            } catch(e) {}
-        }
-
-        document.getElementById('btn-send').onclick = sendMessage;
-        document.getElementById('msg-input').onkeypress = (e) => { if(e.keyCode === 13) sendMessage(); };
-
-        function addMessage(user, text, style) {
+        function addMessage(user, text, isMe) {
             const div = document.createElement('div');
-            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'}`;
+            div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-1`;
             div.innerHTML = `
                 <span class="text-[7px] text-zinc-600 uppercase mb-1">${user}</span>
-                <div class="${style} p-3 rounded-2xl max-w-[85%] shadow-lg border border-white/5">${text}</div>
+                <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-100'} p-3 rounded-2xl max-w-[85%] shadow-lg border border-white/5">${text}</div>
             `;
-            document.getElementById('chat-window').appendChild(div);
-            document.getElementById('chat-window').scrollTop = 99999;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
     </script>
 </body>
