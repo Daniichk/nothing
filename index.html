@@ -1,138 +1,119 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P ID Chat</title>
+    <title>ID Chat P2P</title>
+    <!-- Важно: этот скрипт должен загрузиться -->
     <script src="https://unpkg.com"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { width: 400px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; display: flex; justify-content: center; background: #f4f4f9; }
+        .box { width: 350px; background: white; padding: 20px; border-radius: 10px; margin-top: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:disabled { background: #ccc; }
         .hidden { display: none; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #0084ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #0073e6; }
-        #chat-box { height: 300px; border: 1px solid #f0f0f0; overflow-y: auto; padding: 10px; margin: 15px 0; background: #fafafa; border-radius: 8px; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 15px; max-width: 80%; word-wrap: break-word; }
-        .received { background: #e4e6eb; align-self: flex-start; }
-        .sent { background: #0084ff; color: white; align-self: flex-end; }
-        .status { font-size: 0.8em; color: #65676b; text-align: center; margin-bottom: 10px; }
+        #log { height: 200px; border: 1px solid #ddd; overflow-y: auto; padding: 10px; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <!-- ШАГ 1: ID -->
-    <div id="step-1">
-        <h3>Шаг 1: Придумайте ваш ID</h3>
-        <input type="text" id="my-id-input" placeholder="Например: vanya777 (или пусто для авто)">
-        <button onclick="initPeer()">Далее</button>
+<div class="box">
+    <!-- Шаг 1: ID -->
+    <div id="step1">
+        <h3>Шаг 1: Придумайте ID</h3>
+        <input type="text" id="myIdInput" placeholder="Например: user123">
+        <button id="btn1" onclick="initPeer()">Создать ID</button>
+        <p id="status1" style="font-size: 12px; color: orange;"></p>
     </div>
 
-    <!-- ШАГ 2: НИКНЕЙМ -->
-    <div id="step-2" class="hidden">
+    <!-- Шаг 2: Ник -->
+    <div id="step2" class="hidden">
         <h3>Шаг 2: Ваш никнейм</h3>
-        <input type="text" id="my-nick-input" placeholder="Как вас будут видеть?">
-        <button onclick="startApp()">Войти в чат</button>
+        <input type="text" id="nickInput" placeholder="Ваше имя">
+        <button onclick="saveNick()">Войти в чат</button>
     </div>
 
-    <!-- ШАГ 3: ЧАТ -->
-    <div id="step-3" class="hidden">
-        <div class="status">Вы: <b id="display-id"></b> | Ник: <b id="display-nick"></b></div>
-        <input type="text" id="peer-id-input" placeholder="Введите ID друга для подключения">
-        <button onclick="connectToFriend()">Подключиться к другу</button>
-        
-        <div id="chat-box"></div>
-        
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="msg-input" placeholder="Сообщение...">
-            <button onclick="send()" style="width: 80px;">➜</button>
-        </div>
+    <!-- Шаг 3: Чат -->
+    <div id="step3" class="hidden">
+        <p>Ваш ID: <b id="myIdDisplay"></b></p>
+        <input type="text" id="targetIdInput" placeholder="ID друга">
+        <button onclick="connect()">Подключиться к другу</button>
+        <div id="log"></div>
+        <input type="text" id="msgInput" placeholder="Сообщение...">
+        <button onclick="send()">Отправить</button>
     </div>
 </div>
 
 <script>
     let peer, conn, myNick;
 
-    // Шаг 1: Создаем Peer с кастомным или случайным ID
     function initPeer() {
-        const requestedId = document.getElementById('my-id-input').value;
-        // Если ID пустой, PeerJS сам сгенерирует случайный
-        peer = requestedId ? new Peer(requestedId) : new Peer();
+        const id = document.getElementById('myIdInput').value;
+        const btn = document.getElementById('btn1');
+        const stat = document.getElementById('status1');
 
-        peer.on('open', (id) => {
-            document.getElementById('display-id').innerText = id;
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
+        if(!id) return alert("Введите ID");
+
+        btn.disabled = true;
+        stat.innerText = "Регистрация в сети...";
+
+        // Создаем подключение
+        peer = new Peer(id);
+
+        peer.on('open', (assignedId) => {
+            document.getElementById('myIdDisplay').innerText = assignedId;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
         });
 
         peer.on('error', (err) => {
-            alert("Ошибка: Возможно этот ID уже занят. Попробуйте другой.");
+            btn.disabled = false;
+            stat.innerText = "Ошибка: этот ID занят или нет сети.";
             console.error(err);
         });
 
-        // Слушаем входящие подключения
-        peer.on('connection', (connection) => {
-            conn = connection;
-            setupChat();
+        // Если кто-то подключается к нам
+        peer.on('connection', (c) => {
+            conn = c;
+            setupConn();
         });
     }
 
-    // Шаг 2: Сохраняем ник и переходим в чат
-    function startApp() {
-        myNick = document.getElementById('my-nick-input').value || "Аноним";
-        document.getElementById('display-nick').innerText = myNick;
-        document.getElementById('step-2').classList.add('hidden');
-        document.getElementById('step-3').classList.remove('hidden');
+    function saveNick() {
+        myNick = document.getElementById('nickInput').value || "Аноним";
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
     }
 
-    // Подключение к другому пользователю по его ID
-    function connectToFriend() {
-        const friendId = document.getElementById('peer-id-input').value;
-        if (!friendId) return alert("Введите ID друга");
-        
-        conn = peer.connect(friendId);
-        setupChat();
+    function connect() {
+        const targetId = document.getElementById('targetIdInput').value;
+        if(!targetId) return alert("Введите ID друга");
+        conn = peer.connect(targetId);
+        setupConn();
     }
 
-    // Настройка логики приема/передачи сообщений
-    function setupChat() {
+    function setupConn() {
         conn.on('open', () => {
-            addStatus(`Подключено к собеседнику!`);
-            
+            addLog("Система: Соединение установлено!");
             conn.on('data', (data) => {
-                addMessage(data.nick, data.text, 'received');
+                addLog(`${data.nick}: ${data.msg}`);
             });
         });
-        
-        conn.on('close', () => addStatus("Собеседник отключился"));
     }
 
     function send() {
-        const text = document.getElementById('msg-input').value;
-        if (!text || !conn) return;
-
-        conn.send({ nick: myNick, text: text });
-        addMessage("Я", text, 'sent');
-        document.getElementById('msg-input').value = "";
+        const msg = document.getElementById('msgInput').value;
+        if(!msg || !conn) return;
+        conn.send({ nick: myNick, msg: msg });
+        addLog(`Я: ${msg}`);
+        document.getElementById('msgInput').value = "";
     }
 
-    function addMessage(nick, text, type) {
-        const box = document.getElementById('chat-box');
+    function addLog(txt) {
         const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerHTML = `<small style="display:block; font-size:0.7em; opacity:0.7">${nick}</small>${text}`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function addStatus(text) {
-        const div = document.createElement('div');
-        div.className = 'status';
-        div.innerText = text;
-        document.getElementById('chat-box').appendChild(div);
+        div.innerText = txt;
+        document.getElementById('log').appendChild(div);
     }
 </script>
-
 </body>
 </html>
