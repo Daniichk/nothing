@@ -2,67 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly.space | Invisible Network</title>
+    <title>Connectly.space | Direct P2P</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com"></script>
 </head>
-<body class="bg-[#0a0a0a] text-zinc-300 font-mono p-6 flex flex-col items-center min-h-screen justify-center">
+<body class="bg-black text-zinc-300 font-mono p-6 min-h-screen flex flex-col items-center">
 
-    <div id="app" class="w-full max-w-md bg-zinc-900/50 p-8 rounded-3xl border border-white/5 shadow-2xl">
-        <!-- Секция 1: Если в ссылке нет данных (Генератор) -->
-        <div id="setup" class="hidden">
-            <h1 class="text-2xl font-black text-white mb-6 tracking-tighter uppercase">Create Your <span class="text-blue-500">Live-Link</span></h1>
-            <input id="name" type="text" placeholder="Name" class="w-full bg-black p-4 rounded-xl mb-3 border border-zinc-800 focus:border-blue-500 outline-none">
-            <input id="hobby" type="text" placeholder="Hobby (e.g. Arduino, Chess)" class="w-full bg-black p-4 rounded-xl mb-3 border border-zinc-800 focus:border-blue-500 outline-none">
-            <input id="social" type="text" placeholder="Telegram / Discord" class="w-full bg-black p-4 rounded-xl mb-6 border border-zinc-800 focus:border-blue-500 outline-none">
-            <button onclick="generate()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition">GENERATE MY LINK</button>
-            <div id="resultLink" class="mt-6 text-[10px] break-all text-zinc-500 cursor-pointer hover:text-blue-400"></div>
+    <div class="w-full max-w-md bg-zinc-900 rounded-3xl p-8 border border-white/5">
+        <h1 class="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Connectly<span class="text-blue-500">.Direct</span></h1>
+        
+        <!-- Твой ID -->
+        <div class="mb-8 p-4 bg-blue-600/10 rounded-xl border border-blue-500/20">
+            <p class="text-[10px] uppercase text-blue-400 mb-1">Your Local ID (Share this):</p>
+            <div id="myId" class="text-white font-bold text-sm">Initializing...</div>
         </div>
 
-        <!-- Секция 2: Если ссылка содержит данные (Профиль) -->
-        <div id="profile" class="hidden text-center">
-            <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-blue-900/40">👋</div>
-            <h1 id="viewName" class="text-3xl font-black text-white mb-2 uppercase tracking-tighter"></h1>
-            <p class="text-zinc-500 text-sm mb-8 uppercase tracking-widest">I'm looking for a partner in:</p>
-            <div id="viewHobby" class="bg-blue-500/10 border border-blue-500/20 text-blue-400 p-4 rounded-2xl text-xl font-bold mb-10"></div>
-            <a id="viewSocial" href="#" class="block w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-200 transition uppercase">Contact Me</a>
-            <a href="/" class="block mt-6 text-[10px] text-zinc-600 underline">Create my own Connectly link</a>
+        <!-- Подключение -->
+        <div class="mb-8">
+            <input id="peerId" type="text" placeholder="Enter friend's ID" class="w-full bg-black border border-zinc-800 p-4 rounded-xl mb-3 focus:border-blue-500 outline-none">
+            <button onclick="connectToPeer()" class="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-blue-500 hover:text-white transition uppercase">Connect</button>
+        </div>
+
+        <!-- Чат -->
+        <div id="chatBox" class="hidden">
+            <div id="messages" class="h-64 overflow-y-auto mb-4 p-4 bg-black rounded-xl text-sm space-y-2 border border-white/5"></div>
+            <div class="flex gap-2">
+                <input id="msgInput" type="text" placeholder="Type message..." class="flex-1 bg-black border border-zinc-800 p-3 rounded-lg outline-none">
+                <button onclick="sendMessage()" class="bg-blue-600 px-6 rounded-lg text-white font-bold">SEND</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Логика: проверяем, есть ли данные в URL после символа #
-        const hash = window.location.hash.substring(1);
+        let peer = new Peer(); // Генерируем случайный ID
+        let conn;
 
-        if (hash) {
-            // Если есть хэш — расшифровываем и показываем профиль
-            document.getElementById('profile').classList.remove('hidden');
-            try {
-                const data = JSON.parse(atob(hash)); // Декодируем из Base64
-                document.getElementById('viewName').innerText = data.n;
-                document.getElementById('viewHobby').innerText = data.h;
-                document.getElementById('viewSocial').href = "https://t.me" + data.s.replace('@','');
-                document.getElementById('viewSocial').innerText = "Message " + data.s;
-            } catch(e) { window.location.hash = ""; location.reload(); }
-        } else {
-            // Если нет — показываем форму создания
-            document.getElementById('setup').classList.remove('hidden');
+        // Когда PeerJS готов, показываем ID
+        peer.on('open', (id) => {
+            document.getElementById('myId').innerText = id;
+        });
+
+        // Слушаем входящие подключения
+        peer.on('connection', (c) => {
+            conn = c;
+            setupChat();
+        });
+
+        // Функция подключения к другу
+        function connectToPeer() {
+            const id = document.getElementById('peerId').value;
+            conn = peer.connect(id);
+            setupChat();
         }
 
-        function generate() {
-            const n = document.getElementById('name').value;
-            const h = document.getElementById('hobby').value;
-            const s = document.getElementById('social').value;
-            if(!n || !h || !s) return alert("Fill all fields!");
+        function setupChat() {
+            document.getElementById('chatBox').classList.remove('hidden');
+            conn.on('data', (data) => {
+                addMessage(data, 'friend');
+            });
+            conn.on('open', () => {
+                addMessage("System: Connected!", 'system');
+            });
+        }
 
-            const data = { n, h, s };
-            const encoded = btoa(JSON.stringify(data)); // Кодируем в Base64
-            const finalURL = window.location.origin + "/#" + encoded;
-            
-            document.getElementById('resultLink').innerText = "Your link (Click to copy): " + finalURL;
-            document.getElementById('resultLink').onclick = () => {
-                navigator.clipboard.writeText(finalURL);
-                alert("Link copied! Put it in your bio or send to a friend.");
-            };
+        function sendMessage() {
+            const msg = document.getElementById('msgInput').value;
+            if(!msg) return;
+            conn.send(msg);
+            addMessage(msg, 'me');
+            document.getElementById('msgInput').value = "";
+        }
+
+        function addMessage(text, side) {
+            const div = document.createElement('div');
+            div.className = side === 'me' ? 'text-right text-blue-400' : 'text-left text-zinc-400';
+            div.innerText = (side === 'me' ? 'You: ' : 'Friend: ') + text;
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = 9999;
         }
     </script>
 </body>
