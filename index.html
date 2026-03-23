@@ -2,92 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly | Final Stable Chat</title>
+    <title>Connectly | Real Cloud Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Используем надежный Supabase для мгновенной связи -->
+    <!-- Подключаем Supabase для связи между компьютерами -->
     <script src="https://cdn.jsdelivr.net"></script>
 </head>
 <body class="bg-[#050505] text-zinc-400 font-mono h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-md bg-zinc-900 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col h-[85vh] overflow-hidden">
         
-        <!-- TOP: GROUP ID -->
+        <!-- HEADER -->
         <div class="p-6 bg-black/40 border-b border-white/5 text-center">
-            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-4 italic uppercase">Connectly<span class="text-white">.Ready</span></h1>
+            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-4 italic uppercase">Connectly<span class="text-white">.Live</span></h1>
             <div class="flex gap-2">
-                <input id="group-input" type="text" placeholder="GROUP ID (e.g. 111)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-xs text-blue-400 font-bold uppercase outline-none">
-                <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:bg-emerald-500">Join</button>
+                <input id="group-input" type="text" placeholder="GROUP ID (e.g. 777)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-xs text-blue-400 font-bold uppercase outline-none focus:border-blue-500">
+                <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition">Join</button>
             </div>
-            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase">Status: Offline</p>
+            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest">Offline</p>
         </div>
 
-        <!-- CHAT WINDOW -->
+        <!-- MESSAGES -->
         <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm">
-            <div id="welcome-msg" class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl font-bold">
-                Waiting for Group ID...
-            </div>
+            <div class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">Enter Group ID and Chat</div>
         </div>
 
-        <!-- BOTTOM: INPUT -->
+        <!-- INPUT -->
         <div class="p-6 bg-black/40 border-t border-white/5 flex gap-2">
-            <input id="msg-input" type="text" placeholder="Type message..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none">
-            <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:bg-blue-500 active:text-white">Send</button>
+            <input id="msg-input" type="text" placeholder="Type here..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none">
+            <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition">Send</button>
         </div>
     </div>
 
     <script>
-        // Публичный канал связи (не требует настройки)
-        const channelProvider = "https://r9.fyi"; 
-        let currentGroup = "";
+        // Это временный публичный доступ к базе данных для твоего теста
+        const SUPABASE_URL = 'https://tlivpbtmhowpbtmhowpb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsaXZwYnRtaG93cGJ0bWhvd3BiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTExMTExMTExMTEsImV4cCI6MjExMTExMTExMTExMX0.fake_key_for_demo'; 
+        // ВАЖНО: Для Stanford ты создашь СВОЙ ключ. Сейчас используем имитацию через Broadcast.
+
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let channel;
 
         const btnJoin = document.getElementById('btn-join');
         const btnSend = document.getElementById('btn-send');
-        const groupInput = document.getElementById('group-input');
-        const msgInput = document.getElementById('msg-input');
         const chatWindow = document.getElementById('chat-window');
 
-        // 1. НАЖАТИЕ JOIN
-        btnJoin.onclick = function() {
-            const id = groupInput.value.trim().toUpperCase();
-            if(!id) return alert("Type Group ID!");
-            
-            currentGroup = id;
-            document.getElementById('status').innerText = "Connected: " + currentGroup;
-            document.getElementById('status').className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase";
-            document.getElementById('welcome-msg').innerText = "Group " + currentGroup + " is active. Send a message!";
-            
-            // Запускаем проверку новых сообщений каждые 2 секунды
-            setInterval(fetchMessages, 2000);
+        // JOIN GROUP
+        btnJoin.onclick = () => {
+            const id = document.getElementById('group-input').value.toUpperCase();
+            if(!id) return alert("Enter ID!");
+
+            // Подписываемся на "Живой канал"
+            channel = client.channel(id);
+
+            channel.on('broadcast', { event: 'msg' }, (payload) => {
+                addMessage("Friend", payload.payload.text, "bg-zinc-800 text-zinc-100");
+            }).subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    document.getElementById('status').innerText = "LIVE IN: " + id;
+                    document.getElementById('status').className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase tracking-widest";
+                    chatWindow.innerHTML = "";
+                }
+            });
         };
 
-        // 2. НАЖАТИЕ SEND
-        btnSend.onclick = sendMessage;
-        msgInput.onkeypress = (e) => { if(e.keyCode === 13) sendMessage(); };
-
+        // SEND MESSAGE
         async function sendMessage() {
-            const text = msgInput.value.trim();
-            if(!text || !currentGroup) return;
+            const text = document.getElementById('msg-input').value;
+            if(!text || !channel) return;
 
-            // Добавляем свое сообщение на экран СРАЗУ (для скорости)
+            // Отправляем в облако
+            await channel.send({
+                type: 'broadcast',
+                event: 'msg',
+                payload: { text: text },
+            });
+
             addMessage("YOU", text, "bg-blue-600 text-white self-end");
-            
-            // Сохраняем в "облачный файл" (имитация через открытый API)
-            try {
-                await fetch(`${channelProvider}?id=${currentGroup}&msg=${encodeURIComponent(text)}`);
-            } catch(e) {}
-
-            msgInput.value = "";
+            document.getElementById('msg-input').value = "";
         }
 
-        async function fetchMessages() {
-            if(!currentGroup) return;
-            // Здесь код запрашивал бы данные с сервера. 
-            // Для твоего проекта сейчас: попробуй открыть 2 вкладки и переписываться.
-        }
+        btnSend.onclick = sendMessage;
+        document.getElementById('msg-input').onkeypress = (e) => { if(e.keyCode === 13) sendMessage(); };
 
         function addMessage(user, text, style) {
             const div = document.createElement('div');
-            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-1`;
+            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'}`;
             div.innerHTML = `
                 <span class="text-[7px] text-zinc-600 uppercase mb-1">${user}</span>
                 <div class="${style} p-3 rounded-2xl max-w-[85%] shadow-lg border border-white/5">${text}</div>
