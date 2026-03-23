@@ -1,0 +1,52 @@
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
+
+// Хранилище: { "ID_пользователя": "ID_сокета" }
+const users = {};
+
+io.on('connection', (socket) => {
+    console.log('Новое подключение:', socket.id);
+
+    // Регистрация пользователя по его ID
+    socket.on('register', (customId) => {
+        // Проверяем, не занят ли ID кем-то другим
+        if (users[customId]) {
+            socket.emit('error_msg', 'Этот ID уже занят другим пользователем');
+        } else {
+            users[customId] = socket.id;
+            socket.myId = customId; // Привязываем ID к сокету
+            socket.emit('registered', customId);
+            console.log(`Пользователь ${customId} в сети`);
+        }
+    });
+
+    // Личное сообщение
+    socket.on('private_message', ({ to, text }) => {
+        const recipientSocketId = users[to];
+        if (recipientSocketId) {
+            io.to(recipientSocketId).emit('receive_message', {
+                from: socket.myId,
+                text: text
+            });
+        } else {
+            socket.emit('error_msg', 'Пользователь с таким ID не найден');
+        }
+    });
+
+    // Удаление при выходе
+    socket.on('disconnect', () => {
+        if (socket.myId) {
+            delete users[socket.myId];
+            console.log(`Пользователь ${socket.myId} вышел`);
+        }
+    });
+});
+
+server.listen(3000, () => {
+    console.log('Сервер запущен на http://localhost:3000');
+});
