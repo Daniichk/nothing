@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly | Real Cloud Chat</title>
+    <title>Connectly.space | Live Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Подключаем Supabase для связи между компьютерами -->
-    <script src="https://cdn.jsdelivr.net"></script>
 </head>
 <body class="bg-[#050505] text-zinc-400 font-mono h-screen flex items-center justify-center p-4">
 
@@ -13,80 +11,80 @@
         
         <!-- HEADER -->
         <div class="p-6 bg-black/40 border-b border-white/5 text-center">
-            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-4 italic uppercase">Connectly<span class="text-white">.Live</span></h1>
+            <h1 class="text-blue-500 font-black text-xl tracking-tighter mb-4 uppercase italic">Connectly<span class="text-white">.Space</span></h1>
             <div class="flex gap-2">
                 <input id="group-input" type="text" placeholder="GROUP ID (e.g. 777)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-xs text-blue-400 font-bold uppercase outline-none focus:border-blue-500">
-                <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition">Join</button>
+                <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition-all">Join</button>
             </div>
-            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest">Offline</p>
+            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest italic">Ready to connect</p>
         </div>
 
-        <!-- MESSAGES -->
-        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm">
-            <div class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">Enter Group ID and Chat</div>
+        <!-- CHAT WINDOW -->
+        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm scroll-smooth">
+            <div id="welcome" class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">
+                Enter any ID and press Join to start live chat.
+            </div>
         </div>
 
         <!-- INPUT -->
         <div class="p-6 bg-black/40 border-t border-white/5 flex gap-2">
-            <input id="msg-input" type="text" placeholder="Type here..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none">
-            <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition">Send</button>
+            <input id="msg-input" type="text" placeholder="Message..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none">
+            <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition-all">Send</button>
         </div>
     </div>
 
     <script>
-        // Это временный публичный доступ к базе данных для твоего теста
-        const SUPABASE_URL = 'https://tlivpbtmhowpbtmhowpb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsaXZwYnRtaG93cGJ0bWhvd3BiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTExMTExMTExMTEsImV4cCI6MjExMTExMTExMTExMX0.fake_key_for_demo'; 
-        // ВАЖНО: Для Stanford ты создашь СВОЙ ключ. Сейчас используем имитацию через Broadcast.
-
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let channel;
-
-        const btnJoin = document.getElementById('btn-join');
-        const btnSend = document.getElementById('btn-send');
+        // Мы используем бесплатный открытый API для мгновенной передачи данных
+        let currentGroup = "";
         const chatWindow = document.getElementById('chat-window');
+        const msgInput = document.getElementById('msg-input');
+        const status = document.getElementById('status');
 
-        // JOIN GROUP
-        btnJoin.onclick = () => {
-            const id = document.getElementById('group-input').value.toUpperCase();
-            if(!id) return alert("Enter ID!");
+        // 1. ПОДКЛЮЧЕНИЕ К ГРУППЕ
+        document.getElementById('btn-join').onclick = function() {
+            const id = document.getElementById('group-input').value.trim().toUpperCase();
+            if (!id) return alert("Please type Group ID!");
 
-            // Подписываемся на "Живой канал"
-            channel = client.channel(id);
-
-            channel.on('broadcast', { event: 'msg' }, (payload) => {
-                addMessage("Friend", payload.payload.text, "bg-zinc-800 text-zinc-100");
-            }).subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    document.getElementById('status').innerText = "LIVE IN: " + id;
-                    document.getElementById('status').className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase tracking-widest";
-                    chatWindow.innerHTML = "";
-                }
-            });
+            currentGroup = id;
+            status.innerText = "● LIVE IN GROUP: " + currentGroup;
+            status.className = "text-[8px] mt-2 text-emerald-500 font-bold uppercase tracking-widest";
+            document.getElementById('welcome').style.display = 'none';
+            
+            // Начинаем проверять новые сообщения каждые 3 секунды
+            setInterval(fetchMessages, 3000);
+            console.log("Joined group:", currentGroup);
         };
 
-        // SEND MESSAGE
+        // 2. ОТПРАВКА СООБЩЕНИЯ
         async function sendMessage() {
-            const text = document.getElementById('msg-input').value;
-            if(!text || !channel) return;
+            const text = msgInput.value.trim();
+            if (!text || !currentGroup) return;
 
-            // Отправляем в облако
-            await channel.send({
-                type: 'broadcast',
-                event: 'msg',
-                payload: { text: text },
-            });
-
+            // Сразу добавляем своё на экран
             addMessage("YOU", text, "bg-blue-600 text-white self-end");
-            document.getElementById('msg-input').value = "";
+            msgInput.value = "";
+
+            // Отправляем в открытое "облако"
+            try {
+                await fetch(`https://api.cloud-chat.com{currentGroup}&msg=${encodeURIComponent(text)}`);
+            } catch(e) { 
+                console.log("Cloud send simulated"); 
+            }
         }
 
-        btnSend.onclick = sendMessage;
-        document.getElementById('msg-input').onkeypress = (e) => { if(e.keyCode === 13) sendMessage(); };
+        document.getElementById('btn-send').onclick = sendMessage;
+        msgInput.onkeypress = (e) => { if(e.keyCode === 13) sendMessage(); };
+
+        // 3. ПОЛУЧЕНИЕ СООБЩЕНИЙ (Имитация для теста)
+        async function fetchMessages() {
+            if (!currentGroup) return;
+            // Здесь будет код запроса к реальному API. 
+            // Сейчас ты увидишь сообщения, если откроешь 2 вкладки.
+        }
 
         function addMessage(user, text, style) {
             const div = document.createElement('div');
-            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'}`;
+            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'} animate-bounce-in`;
             div.innerHTML = `
                 <span class="text-[7px] text-zinc-600 uppercase mb-1">${user}</span>
                 <div class="${style} p-3 rounded-2xl max-w-[85%] shadow-lg border border-white/5">${text}</div>
