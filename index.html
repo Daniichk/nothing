@@ -2,85 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connectly.space | Founder's Journal</title>
+    <title>Connectly.space | School Live Wall</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .glass-card { background: rgba(22, 30, 46, 0.8); border: 1px solid rgba(255,255,255,0.05); }
-        .btn-publish { background: linear-gradient(90deg, #38bdf8, #818cf8); transition: all 0.3s ease; }
-        .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
-    </style>
 </head>
-<body class="p-6 md:p-20">
+<body class="bg-[#050505] text-slate-300 font-sans p-4">
 
-    <div class="max-w-2xl mx-auto">
-        <!-- Header -->
-        <header class="mb-12">
-            <h1 class="text-3xl font-extrabold tracking-tight">Connectly<span class="text-sky-500">.space</span></h1>
-            <p class="text-slate-500 text-sm mt-1 uppercase tracking-widest font-mono italic">Founder's Dev Log</p>
+    <div class="max-w-md mx-auto">
+        <header class="py-10 text-center">
+            <h1 class="text-5xl font-black tracking-tighter text-white">CONNECTLY<span class="text-blue-600">.</span></h1>
+            <p class="text-slate-500 mt-2">Find a partner for any hobby in our school.</p>
         </header>
 
-        <!-- Input Area (Where you write) -->
-        <div class="glass-card p-6 rounded-2xl mb-12 shadow-2xl">
-            <h3 class="text-sm font-bold text-sky-400 mb-4 uppercase">New Log Entry</h3>
-            <input id="entryTitle" type="text" placeholder="Entry Title..." class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 mb-4 focus:outline-none focus:border-sky-500">
-            <textarea id="entryText" rows="4" placeholder="What's on your mind? Thoughts, code, errors..." class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 mb-4 focus:outline-none focus:border-sky-500"></textarea>
-            <button onclick="publishEntry()" class="btn-publish w-full py-3 rounded-lg font-bold text-white uppercase tracking-wider">Publish to Journal</button>
+        <!-- Поле ввода -->
+        <div class="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 mb-8">
+            <input id="name" type="text" placeholder="Your Name / Class" class="w-full bg-black/40 p-4 rounded-xl mb-3 border border-white/10 focus:border-blue-500 outline-none transition">
+            <textarea id="msg" placeholder="What are you looking for? (e.g. Chess partner at 2 PM)" class="w-full bg-black/40 p-4 rounded-xl mb-3 border border-white/10 focus:border-blue-500 outline-none h-28"></textarea>
+            <button onclick="send()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition duration-300 shadow-lg shadow-blue-900/20">POST TO WALL</button>
         </div>
 
-        <!-- Feed (Where logs appear) -->
-        <div id="journalFeed" class="space-y-8">
-            <!-- Entries will be injected here by JavaScript -->
+        <!-- Живая лента -->
+        <div id="feed" class="space-y-4">
+            <div class="text-center animate-pulse py-10">Connecting to school network...</div>
         </div>
     </div>
 
     <script>
-        // Функция загрузки записей при открытии страницы
-        window.onload = function() {
-            displayEntries();
-        };
+        // Мы используем публичный "ящик" для хранения данных. Это заменит нам сложную базу.
+        const URL = 'https://api.jsonbin.io';
+        const KEY = '$2a$10$7zR8m5Mv.Ym8l6q/R.v7p.C8yYhB0VvG4zU1S8m/z6r9P7y'; // Демо-ключ
 
-        function publishEntry() {
-            const title = document.getElementById('entryTitle').value;
-            const text = document.getElementById('entryText').value;
-            const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-            if (!title || !text) {
-                alert("Please fill both title and text!");
-                return;
-            }
-
-            // Создаем объект записи
-            const newEntry = { title, text, date, id: Date.now() };
-
-            // Получаем старые записи из памяти (имитация базы в файле)
-            let entries = JSON.parse(localStorage.getItem('connectly_logs')) || [];
-            
-            // Добавляем новую в начало
-            entries.unshift(newEntry);
-
-            // Сохраняем обратно
-            localStorage.setItem('connectly_logs', JSON.stringify(entries));
-
-            // Очищаем поля и обновляем ленту
-            document.getElementById('entryTitle').value = '';
-            document.getElementById('entryText').value = '';
-            displayEntries();
+        // Загрузка сообщений
+        async function load() {
+            try {
+                const res = await fetch(URL + '/latest', { headers: { 'X-Master-Key': KEY }});
+                const data = await res.json();
+                render(data.record.posts);
+            } catch (e) { document.getElementById('feed').innerHTML = "Error loading. Check connection."; }
         }
 
-        function displayEntries() {
-            const feed = document.getElementById('journalFeed');
-            const entries = JSON.parse(localStorage.getItem('connectly_logs')) || [];
-            
-            feed.innerHTML = entries.map(entry => `
-                <div class="border-l-2 border-slate-800 pl-6 pb-2 transition hover:border-sky-500">
-                    <span class="text-xs font-mono text-slate-500">${entry.date}</span>
-                    <h2 class="text-xl font-bold text-slate-200 mt-1">${entry.title}</h2>
-                    <p class="text-slate-400 mt-3 leading-relaxed">${entry.text}</p>
+        // Отправка нового сообщения
+        async function send() {
+            const btn = document.getElementById('btn');
+            const name = document.getElementById('name').value;
+            const msg = document.getElementById('msg').value;
+            if(!name || !msg) return alert("Fill all fields!");
+
+            btn.innerText = "SENDING...";
+            btn.disabled = true;
+
+            // Сначала получаем старые, добавляем новое, сохраняем всё
+            const res = await fetch(URL + '/latest', { headers: { 'X-Master-Key': KEY }});
+            const oldData = await res.json();
+            const newPosts = [{name, msg, date: new Date().toLocaleTimeString()}, ...oldData.record.posts].slice(0, 20);
+
+            await fetch(URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': KEY },
+                body: JSON.stringify({ posts: newPosts })
+            });
+
+            document.getElementById('msg').value = "";
+            btn.innerText = "POST TO WALL";
+            btn.disabled = false;
+            load();
+        }
+
+        function render(posts) {
+            document.getElementById('feed').innerHTML = posts.map(p => `
+                <div class="bg-zinc-900/30 p-5 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="flex justify-between items-center mb-2 text-[10px] font-mono text-blue-500 uppercase tracking-widest">
+                        <span>${p.name}</span>
+                        <span class="text-zinc-600">${p.date}</span>
+                    </div>
+                    <p class="text-zinc-200 text-sm leading-relaxed">${p.msg}</p>
                 </div>
             `).join('');
         }
+
+        load(); // Запуск при открытии
+        setInterval(load, 10000); // Авто-обновление каждые 10 сек
     </script>
 </body>
 </html>
