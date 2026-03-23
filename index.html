@@ -6,55 +6,81 @@
     <title>Connectly.space | Founder's Journal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent { color: #38bdf8; }
+        body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(22, 30, 46, 0.8); border: 1px solid rgba(255,255,255,0.05); }
+        .btn-publish { background: linear-gradient(90deg, #38bdf8, #818cf8); transition: all 0.3s ease; }
+        .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
     </style>
 </head>
 <body class="p-6 md:p-20">
 
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-2xl mx-auto">
         <!-- Header -->
-        <header class="mb-16 border-b border-slate-700 pb-8">
-            <h1 class="text-4xl font-bold mb-2">Connectly<span class="accent">.space</span></h1>
-            <p class="text-slate-400 italic">"The Social Network for Real Hobbies" — Founder's Journal</p>
+        <header class="mb-12">
+            <h1 class="text-3xl font-extrabold tracking-tight">Connectly<span class="text-sky-500">.space</span></h1>
+            <p class="text-slate-500 text-sm mt-1 uppercase tracking-widest font-mono italic">Founder's Dev Log</p>
         </header>
 
-        <!-- Entry 1 -->
-        <div class="glass p-8 rounded-2xl mb-10 transition hover:border-sky-500/50">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-sky-400 font-mono text-sm">March 23, 2024</span>
-                <span class="bg-sky-500/10 text-sky-400 text-xs px-3 py-1 rounded-full uppercase tracking-widest">Day 1: The Vision</span>
-            </div>
-            <h2 class="text-2xl font-semibold mb-4">The problem with existing networks</h2>
-            <p class="text-slate-300 leading-relaxed">
-                Most social media today is about scrolling, not connecting. I'm 13, and I see people my age feeling lonely despite being "online" 24/7. 
-                Today I secured <strong>connectly.space</strong>. The goal is simple: an algorithm that matches you by skill level and passion, not just looks. 
-            </p>
-            <div class="mt-6 flex gap-4 text-xs font-mono text-slate-500 uppercase">
-                <span>#vision</span> <span>#stanfordbound</span> <span>#tech</span>
-            </div>
+        <!-- Input Area (Where you write) -->
+        <div class="glass-card p-6 rounded-2xl mb-12 shadow-2xl">
+            <h3 class="text-sm font-bold text-sky-400 mb-4 uppercase">New Log Entry</h3>
+            <input id="entryTitle" type="text" placeholder="Entry Title..." class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 mb-4 focus:outline-none focus:border-sky-500">
+            <textarea id="entryText" rows="4" placeholder="What's on your mind? Thoughts, code, errors..." class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 mb-4 focus:outline-none focus:border-sky-500"></textarea>
+            <button onclick="publishEntry()" class="btn-publish w-full py-3 rounded-lg font-bold text-white uppercase tracking-wider">Publish to Journal</button>
         </div>
 
-        <!-- Entry 2 (Template for you to fill) -->
-        <div class="glass p-8 rounded-2xl mb-10 transition hover:border-sky-500/50">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-sky-400 font-mono text-sm">March 24, 2024</span>
-                <span class="bg-purple-500/10 text-purple-400 text-xs px-3 py-1 rounded-full uppercase tracking-widest">Day 2: Tech Stack</span>
-            </div>
-            <h2 class="text-2xl font-semibold mb-4">Why Flutter & Firebase?</h2>
-            <p class="text-slate-300 leading-relaxed">
-                Decided to go with Flutter. One codebase for web and mobile. Stanford loves efficiency. 
-                Started sketching the matching logic: (Hobbies Match * 0.7) + (Age Proximity * 0.3) = Match %. 
-            </p>
+        <!-- Feed (Where logs appear) -->
+        <div id="journalFeed" class="space-y-8">
+            <!-- Entries will be injected here by JavaScript -->
         </div>
-
-        <!-- Footer -->
-        <footer class="text-center text-slate-600 text-sm mt-20">
-            &copy; 2024 Built by the Connectly Founder. 
-            <br>Documentation for Stanford Admissions.
-        </footer>
     </div>
 
+    <script>
+        // Функция загрузки записей при открытии страницы
+        window.onload = function() {
+            displayEntries();
+        };
+
+        function publishEntry() {
+            const title = document.getElementById('entryTitle').value;
+            const text = document.getElementById('entryText').value;
+            const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            if (!title || !text) {
+                alert("Please fill both title and text!");
+                return;
+            }
+
+            // Создаем объект записи
+            const newEntry = { title, text, date, id: Date.now() };
+
+            // Получаем старые записи из памяти (имитация базы в файле)
+            let entries = JSON.parse(localStorage.getItem('connectly_logs')) || [];
+            
+            // Добавляем новую в начало
+            entries.unshift(newEntry);
+
+            // Сохраняем обратно
+            localStorage.setItem('connectly_logs', JSON.stringify(entries));
+
+            // Очищаем поля и обновляем ленту
+            document.getElementById('entryTitle').value = '';
+            document.getElementById('entryText').value = '';
+            displayEntries();
+        }
+
+        function displayEntries() {
+            const feed = document.getElementById('journalFeed');
+            const entries = JSON.parse(localStorage.getItem('connectly_logs')) || [];
+            
+            feed.innerHTML = entries.map(entry => `
+                <div class="border-l-2 border-slate-800 pl-6 pb-2 transition hover:border-sky-500">
+                    <span class="text-xs font-mono text-slate-500">${entry.date}</span>
+                    <h2 class="text-xl font-bold text-slate-200 mt-1">${entry.title}</h2>
+                    <p class="text-slate-400 mt-3 leading-relaxed">${entry.text}</p>
+                </div>
+            `).join('');
+        }
+    </script>
 </body>
 </html>
