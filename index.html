@@ -2,59 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly | Instant Link Chat</title>
+    <title>Connectly | Live School Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключаем библиотеку для мгновенных сообщений -->
+    <script src="https://cdn.pubnub.com"></script>
 </head>
-<body class="bg-black text-white font-mono flex flex-col items-center justify-center min-h-screen p-6">
+<body class="bg-[#080808] text-zinc-300 font-mono flex flex-col h-screen overflow-hidden">
 
-    <div class="w-full max-w-md bg-zinc-900 p-8 rounded-[30px] border border-white/5 shadow-2xl">
-        <h1 class="text-2xl font-black mb-6 tracking-tighter uppercase">Connectly<span class="text-blue-500">.Snap</span></h1>
-        
-        <!-- Окно сообщения -->
-        <div id="displayBox" class="hidden mb-6 p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl">
-            <p class="text-[10px] text-blue-400 uppercase mb-2 italic">Incoming Message:</p>
-            <p id="incomingText" class="text-lg font-bold text-white leading-tight"></p>
-        </div>
+    <!-- Header -->
+    <div class="p-6 border-b border-white/5 bg-zinc-900/50 flex justify-between items-center">
+        <h1 class="text-xl font-black tracking-tighter text-white uppercase">Connectly<span class="text-blue-500">.Live</span></h1>
+        <div id="status" class="text-[10px] text-emerald-500 animate-pulse uppercase">● Online</div>
+    </div>
 
-        <!-- Поле ввода -->
-        <div class="space-y-4">
-            <textarea id="msgInput" placeholder="Write your reply or message..." class="w-full bg-black border border-zinc-800 p-4 rounded-2xl h-32 focus:border-blue-500 outline-none transition"></textarea>
-            <button onclick="createLink()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition uppercase tracking-widest">Generate Reply Link</button>
-        </div>
+    <!-- Chat Messages -->
+    <div id="chatWindow" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <div class="text-center text-zinc-600 text-[10px] uppercase tracking-widest py-10">Welcome to the school network. Be respectful.</div>
+    </div>
 
-        <div id="resultArea" class="hidden mt-8">
-            <p class="text-[10px] text-zinc-500 mb-2 uppercase">Copy this link and send to friend:</p>
-            <div id="finalLink" onclick="copyLink()" class="p-3 bg-black border border-zinc-800 rounded-lg text-[10px] break-all cursor-pointer hover:text-blue-400 transition italic"></div>
+    <!-- Input Area -->
+    <div class="p-6 bg-zinc-900 border-t border-white/5">
+        <div class="max-w-3xl mx-auto flex gap-3">
+            <input id="username" type="text" placeholder="Name" class="w-24 bg-black border border-zinc-800 p-3 rounded-xl text-sm focus:border-blue-500 outline-none text-white">
+            <input id="messageInput" type="text" placeholder="Type a message..." class="flex-1 bg-black border border-zinc-800 p-3 rounded-xl text-sm focus:border-blue-500 outline-none text-white">
+            <button onclick="send()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 rounded-xl font-bold transition uppercase text-xs">Send</button>
         </div>
     </div>
 
     <script>
-        // Проверяем, есть ли сообщение в URL при загрузке
-        window.onload = function() {
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                document.getElementById('displayBox').classList.remove('hidden');
-                document.getElementById('incomingText').innerText = decodeURIComponent(atob(hash));
+        // Инициализируем бесплатный ключ (этот ключ открытый для тестов)
+        const pubnub = new PubNub({
+            publishKey: 'pub-c-403487f9-8472-4752-9596-f946894c2596',
+            subscribeKey: 'sub-c-5722f641-a1e6-42d8-944f-c04944585c5d',
+            userId: "user-" + Math.random().toString(16).slice(2)
+        });
+
+        // Подписываемся на канал школы
+        pubnub.subscribe({ channels: ['school_main_room'] });
+
+        // Слушаем новые сообщения
+        pubnub.addListener({
+            message: function(event) {
+                displayMessage(event.message.user, event.message.text);
             }
-        };
+        });
 
-        function createLink() {
-            const msg = document.getElementById('msgInput').value;
-            if (!msg) return alert("Write something first!");
+        function send() {
+            const user = document.getElementById('username').value || 'Guest';
+            const text = document.getElementById('messageInput').value;
+            if (!text) return;
 
-            // Кодируем сообщение в Base64 для URL
-            const encodedMsg = btoa(encodeURIComponent(msg));
-            const shareUrl = window.location.origin + window.location.pathname + "#" + encodedMsg;
+            pubnub.publish({
+                channel: 'school_main_room',
+                message: { user, text }
+            });
 
-            document.getElementById('resultArea').classList.remove('hidden');
-            document.getElementById('finalLink').innerText = shareUrl;
+            document.getElementById('messageInput').value = '';
         }
 
-        function copyLink() {
-            const text = document.getElementById('finalLink').innerText;
-            navigator.clipboard.writeText(text);
-            alert("Link copied! Send it to your friend.");
+        function displayMessage(user, text) {
+            const win = document.getElementById('chatWindow');
+            const div = document.createElement('div');
+            const isMe = user === document.getElementById('username').value;
+            
+            div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+            div.innerHTML = `
+                <span class="text-[10px] text-zinc-600 mb-1 uppercase">${user}</span>
+                <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-200'} p-3 rounded-2xl max-w-[80%] text-sm shadow-lg">
+                    ${text}
+                </div>
+            `;
+            win.appendChild(div);
+            win.scrollTop = win.scrollHeight;
         }
+
+        // Позволяем отправлять по Enter
+        document.getElementById('messageInput').addEventListener("keypress", function(e) {
+            if (e.key === "Enter") send();
+        });
     </script>
 </body>
 </html>
