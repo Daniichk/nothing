@@ -2,90 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connectly | School ID Chat</title>
+    <title>Connectly.space | Global Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Библиотека Gun для P2P чата без базы данных -->
+    <script src="https://cdn.jsdelivr.net"></script>
 </head>
-<body class="bg-black text-zinc-400 font-mono h-screen flex items-center justify-center p-4">
+<body class="bg-[#050505] text-zinc-400 font-mono h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-md bg-zinc-900 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col h-[80vh] overflow-hidden">
+    <div class="w-full max-w-md bg-zinc-900 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col h-[85vh] overflow-hidden">
         
         <!-- TOP: GROUP ID -->
-        <div class="p-6 bg-black/40 border-b border-white/5">
-            <h1 class="text-white font-black text-center text-xl tracking-tighter mb-4 italic">CONNECTLY<span class="text-blue-500">.SPACE</span></h1>
+        <div class="p-6 bg-black/40 border-b border-white/5 text-center">
+            <h1 class="text-white font-black text-xl tracking-tighter mb-4 italic uppercase text-blue-500">Connectly<span class="text-white">.Live</span></h1>
             <div class="flex gap-2">
                 <input id="group-input" type="text" placeholder="GROUP ID (e.g. 7A)" class="flex-1 bg-zinc-800 border border-white/10 p-3 rounded-xl text-xs text-blue-400 font-bold uppercase outline-none focus:border-blue-500">
                 <button id="btn-join" class="bg-blue-600 text-white px-5 rounded-xl text-[10px] font-bold uppercase active:scale-95 transition">Join</button>
             </div>
+            <p id="status" class="text-[8px] mt-2 text-zinc-600 uppercase tracking-widest">Not connected</p>
         </div>
 
-        <!-- CHAT AREA -->
-        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm">
-            <p class="text-center text-zinc-700 text-[10px] py-10 uppercase tracking-widest">Enter Group ID and press Join to start talking.</p>
+        <!-- CHAT WINDOW -->
+        <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm scroll-smooth">
+            <div class="text-center text-zinc-800 text-[9px] py-10 uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">
+                Enter ID to enter a global room.
+            </div>
         </div>
 
         <!-- BOTTOM: INPUT -->
         <div class="p-6 bg-black/40 border-t border-white/5 flex gap-2">
-            <input id="msg-input" type="text" placeholder="Write something..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none focus:border-blue-500">
+            <input id="msg-input" type="text" placeholder="Message..." class="flex-1 bg-zinc-800 border border-white/10 p-4 rounded-2xl text-sm text-white outline-none focus:border-blue-500">
             <button id="btn-send" class="bg-white text-black px-6 rounded-2xl font-black text-[10px] uppercase active:scale-95 transition">Send</button>
         </div>
     </div>
 
     <script>
-        // Используем открытый API для мгновенных сообщений (без настроек)
-        let channel = "";
+        // Инициализируем Gun.js (используем публичные серверы для связи)
+        const gun = Gun(['https://gun-manhattan.herokuapp.com']);
+        let chatRoom;
+
         const chatWindow = document.getElementById('chat-window');
         const msgInput = document.getElementById('msg-input');
         const groupInput = document.getElementById('group-input');
+        const status = document.getElementById('status');
 
         // КНОПКА ПОДКЛЮЧЕНИЯ
         document.getElementById('btn-join').onclick = function() {
             const id = groupInput.value.trim().toUpperCase();
-            if (!id) { alert("Enter Group ID!"); return; }
+            if (!id) return alert("Enter ID!");
+
+            // Подключаемся к комнате в глобальной сети Gun
+            chatRoom = gun.get('connectly_room_' + id);
             
-            channel = id;
-            chatWindow.innerHTML = `<div class="text-center text-emerald-500 text-[9px] uppercase tracking-widest mb-4 italic">Connected to group: ${channel}</div>`;
-            
-            // Начинаем слушать сообщения (имитация через интервал для простоты без БД)
-            setInterval(checkMessages, 2000); 
+            chatWindow.innerHTML = ""; // Очистить экран
+            status.innerText = "Connected to Global ID: " + id;
+            status.className = "text-[8px] mt-2 text-emerald-500 uppercase tracking-widest font-bold";
+
+            // СЛУШАЕМ НОВЫЕ СООБЩЕНИЯ ОТ ДРУГИХ
+            chatRoom.map().on((data, id) => {
+                if (data && data.msg) {
+                    addMessage(data.user || "Anon", data.msg);
+                }
+            });
         };
 
         // КНОПКА ОТПРАВКИ
-        document.getElementById('btn-send').onclick = function() {
-            sendAction();
-        };
-
-        // ОТПРАВКА ПО ENTER
-        msgInput.onkeypress = function(e) {
-            if (e.keyCode === 13) sendAction();
-        };
+        document.getElementById('btn-send').onclick = sendAction;
+        msgInput.onkeypress = (e) => { if (e.keyCode === 13) sendAction(); };
 
         function sendAction() {
             const text = msgInput.value.trim();
-            if (!text || !channel) { alert("Join a group and type a message!"); return; }
+            if (!text || !chatRoom) return;
 
-            // Выводим сообщение на экран
-            addMessage("YOU", text, "bg-blue-600 text-white self-end");
+            // Отправляем в глобальную сеть
+            chatRoom.set({
+                msg: text,
+                user: "User_" + Math.floor(Math.random()*1000), // Случайное имя
+                time: Date.now()
+            });
+
             msgInput.value = "";
-            
-            // Здесь данные отправлялись бы в облако. Пока сохраним в локальную память для теста на одном ПК.
-            const logs = JSON.parse(localStorage.getItem('chat_' + channel) || '[]');
-            logs.push({ user: "Someone", text: text });
-            localStorage.setItem('chat_' + channel, JSON.stringify(logs));
         }
 
-        function checkMessages() {
-            // В реальности здесь был бы запрос к API. 
-            // Для твоего теста: если откроешь две вкладки с одним ID, сообщения будут синхронизироваться через localStorage.
-            const logs = JSON.parse(localStorage.getItem('chat_' + channel) || '[]');
-            // (Логика обновления экрана...)
-        }
-
-        function addMessage(user, text, style) {
+        function addMessage(user, text) {
             const div = document.createElement('div');
-            div.className = `flex flex-col ${user === 'YOU' ? 'items-end' : 'items-start'}`;
+            div.className = "flex flex-col items-start animate-in fade-in slide-in-from-bottom-2 duration-300";
             div.innerHTML = `
                 <span class="text-[8px] text-zinc-600 uppercase mb-1">${user}</span>
-                <div class="${style} p-3 rounded-2xl max-w-[85%] shadow-lg">${text}</div>
+                <div class="bg-zinc-800 text-zinc-200 p-3 rounded-2xl max-w-[85%] shadow-lg border border-white/5">${text}</div>
             `;
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
