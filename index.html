@@ -1,126 +1,136 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lava Runner + Skill Shop</title>
+    <title>Lava Runner: Mega Edition</title>
     <style>
-        body { margin: 0; background: #2c3e50; display: flex; flex-direction: column; align-items: center; font-family: 'Segoe UI', sans-serif; overflow: hidden; color: white; }
-        canvas { background: #1a1a1a; border-bottom: 10px solid #ff4500; box-shadow: 0 0 50px #ff4500; cursor: pointer; }
-        .ui { position: absolute; top: 10px; width: 800px; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; }
-        .shop { position: absolute; bottom: 20px; display: flex; gap: 10px; }
-        .item { background: #34495e; padding: 10px; border-radius: 10px; border: 2px solid #f1c40f; cursor: pointer; transition: 0.2s; }
-        .item:hover { transform: scale(1.1); background: #f1c40f; color: black; }
-        .item.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        body { margin: 0; background: #1a1a1d; display: flex; flex-direction: column; align-items: center; font-family: 'Courier New', monospace; overflow: hidden; color: #fff; }
+        #game-wrap { position: relative; margin-top: 20px; border: 4px solid #444; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        canvas { background: #000; display: block; cursor: pointer; }
+        .ui { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-around; font-size: 18px; text-shadow: 2px 2px #000; pointer-events: none; }
+        .shop { display: flex; gap: 10px; margin-top: 15px; }
+        .item { background: #333; padding: 10px 15px; border-radius: 8px; border: 2px solid #555; cursor: pointer; transition: 0.2s; }
+        .item:hover { border-color: #0f0; background: #222; }
+        .lvl-bar { width: 800px; height: 10px; background: #333; margin-top: 5px; border-radius: 5px; overflow: hidden; }
+        #progress { width: 0%; height: 100%; background: #0f0; transition: 0.3s; }
     </style>
 </head>
 <body>
+
+<div id="game-wrap">
     <div class="ui">
-        <h2>Score: <span id="score">0</span></h2>
-        <h2>💰 Coins: <span id="coins">0</span></h2>
+        <div>SCORE: <span id="score">0</span></div>
+        <div>LEVEL: <span id="lvl-name">SCHOOL 🏫</span></div>
+        <div>💰: <span id="coins">0</span></div>
     </div>
-
     <canvas id="game"></canvas>
+</div>
 
-    <div class="shop">
-        <div class="item" onclick="buySkill('doubleJump', 10)">👟 Double Jump (10 c)</div>
-        <div class="item" onclick="buySkill('slowMo', 20)">⏰ Slow-Mo (20 c)</div>
-        <div class="item" onclick="buySkill('shield', 30)">🛡️ Shield (30 c)</div>
-    </div>
+<div class="lvl-bar"><div id="progress"></div></div>
+
+<div class="shop">
+    <div class="item" onclick="buy('doubleJump', 15)">👟 Jump x2 (15c)</div>
+    <div class="item" onclick="buy('shield', 25)">🛡️ Shield (25c)</div>
+    <div class="item" onclick="resetData()" style="color: #ff4444;">🗑️ Reset All</div>
+</div>
 
 <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     canvas.width = 800; canvas.height = 400;
 
-    let score = 0, coins = 0, gameActive = true;
-    let frame = 0, gameSpeed = 5;
+    // --- СИСТЕМА СОХРАНЕНИЯ ---
+    let savedCoins = parseInt(localStorage.getItem('lava_coins')) || 0;
+    document.getElementById('coins').innerText = savedCoins;
 
-    // Навыки
-    let skills = { doubleJump: false, slowMoActive: false, hasShield: false };
+    let gameActive = true, score = 0, frame = 0;
+    let currentLvl = 0;
+    const levels = [
+        { name: "SCHOOL 🏫", bg: "#2c3e50", obs: "🌵", floor: "🔥" },
+        { name: "FOREST 🌲", bg: "#1b3022", obs: "🍄", floor: "🐍" },
+        { name: "SPACE 🚀", bg: "#0b0d17", obs: "☄️", floor: "👾" }
+    ];
 
-    const player = {
-        x: 100, y: 300, w: 40, h: 40,
-        dy: 0, gravity: 0.6, jumpForce: 13,
-        jumps: 0, sprite: '🏃'
-    };
+    let player = { x: 100, y: 300, w: 40, h: 40, dy: 0, g: 0.7, jump: 14, jumps: 0, sprite: '🏃', dead: false };
+    let obstacles = [], skills = { doubleJump: false, shield: false };
 
-    const obstacles = [];
+    function save() { localStorage.setItem('lava_coins', savedCoins); }
+    function resetData() { localStorage.clear(); location.reload(); }
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Рисуем лаву (фон)
-        ctx.fillStyle = '#ff4500';
-        for(let i=0; i<10; i++) ctx.fillText('🔥', i*90, 395);
+    function buy(skill, price) {
+        if (savedCoins >= price) {
+            savedCoins -= price; document.getElementById('coins').innerText = savedCoins;
+            skills[skill] = true; save();
+            alert(skill + " ACTIVATED!");
+        }
+    }
 
-        // Игрок (Эмодзи)
-        ctx.font = "40px serif";
-        ctx.fillText(player.sprite, player.x, player.y + 35);
-        if(skills.hasShield) { ctx.strokeStyle = '#0ff'; ctx.beginPath(); ctx.arc(player.x+20, player.y+20, 30, 0, Math.PI*2); ctx.stroke(); }
+    function spawn() {
+        if(Math.random() < 0.02) obstacles.push({ x: 850, y: 340, type: 'obs', s: levels[currentLvl].obs });
+        if(Math.random() < 0.01) obstacles.push({ x: 850, y: 340, type: 'coin', s: '🪙' });
+    }
 
-        // Препятствия и Монетки
+    function update() {
+        if (player.dead) return;
+
+        // Уровни
+        currentLvl = Math.min(Math.floor(score / 5000), levels.length - 1);
+        document.getElementById('lvl-name').innerText = levels[currentLvl].name;
+        document.getElementById('progress').style.width = (score % 5000 / 50) + "%";
+
+        player.dy += player.g;
+        player.y += player.dy;
+        if (player.y > 330) { player.y = 330; player.dy = 0; player.jumps = 0; }
+
         obstacles.forEach((obj, i) => {
-            obj.x -= (skills.slowMoActive ? gameSpeed/2 : gameSpeed);
-            ctx.fillText(obj.type === 'obs' ? '🌵' : '🪙', obj.x, obj.y);
+            obj.x -= (6 + currentLvl * 2);
+            if (obj.x < -50) obstacles.splice(i, 1);
 
             // Коллизия
-            let d = Math.hypot(player.x - obj.x, player.y - obj.y);
-            if (d < 35) {
-                if(obj.type === 'coin') {
-                    coins += 5; document.getElementById('coins').innerText = coins;
-                    obstacles.splice(i, 1);
-                } else if (!skills.hasShield) {
-                    gameOver();
+            if (Math.hypot(player.x - obj.x, player.y - obj.y) < 35) {
+                if (obj.type === 'coin') {
+                    savedCoins += 1; document.getElementById('coins').innerText = savedCoins;
+                    save(); obstacles.splice(i, 1);
                 } else {
-                    skills.hasShield = false; // Щит ломается
-                    obstacles.splice(i, 1);
+                    if (skills.shield) { skills.shield = false; obstacles.splice(i, 1); }
+                    else { player.dead = true; player.sprite = '💀'; setTimeout(() => location.reload(), 2000); }
                 }
             }
         });
 
-        if (frame++ % 80 === 0) spawn('obs');
-        if (frame % 150 === 0) spawn('coin');
-
-        // Гравитация
-        player.dy += player.gravity;
-        player.y += player.dy;
-        if (player.y > 330) { player.y = 330; player.dy = 0; player.jumps = 0; }
-
-        if (gameActive) {
-            score++;
-            document.getElementById('score').innerText = Math.floor(score/10);
-            requestAnimationFrame(draw);
-        }
+        score += 2;
+        document.getElementById('score').innerText = Math.floor(score/10);
+        spawn();
     }
 
-    function spawn(type) {
-        obstacles.push({ x: 850, y: 350, type: type });
+    function draw() {
+        ctx.fillStyle = levels[currentLvl].bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Пол
+        ctx.font = "30px serif";
+        for(let i=0; i<12; i++) ctx.fillText(levels[currentLvl].floor, i*70, 395);
+
+        // Игрок
+        ctx.font = "40px serif";
+        if (player.dead) {
+            ctx.globalAlpha = 0.5; // Эффект затухания при смерти
+            ctx.fillText('💥', player.x, player.y + 20);
+        }
+        ctx.fillText(player.sprite, player.x, player.y + 35);
+        ctx.globalAlpha = 1.0;
+
+        if (skills.shield) { ctx.strokeStyle = '#0ff'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(player.x+20, player.y+15, 35, 0, Math.PI*2); ctx.stroke(); }
+
+        obstacles.forEach(obj => ctx.fillText(obj.s, obj.x, obj.y + 35));
+
+        update();
+        requestAnimationFrame(draw);
     }
 
     function jump() {
-        let maxJumps = skills.doubleJump ? 2 : 1;
-        if (player.jumps < maxJumps) {
-            player.dy = -player.jumpForce;
-            player.jumps++;
-        }
-    }
-
-    function buySkill(name, price) {
-        if(coins >= price) {
-            coins -= price;
-            document.getElementById('coins').innerText = coins;
-            if(name === 'doubleJump') skills.doubleJump = true;
-            if(name === 'shield') skills.hasShield = true;
-            if(name === 'slowMo') {
-                skills.slowMoActive = true;
-                setTimeout(() => skills.slowMoActive = false, 5000);
-            }
-        }
-    }
-
-    function gameOver() {
-        gameActive = false;
-        alert("GAME OVER! Score: " + Math.floor(score/10));
-        location.reload();
+        if (player.dead) return;
+        let limit = skills.doubleJump ? 2 : 1;
+        if (player.jumps < limit) { player.dy = -player.jump; player.jumps++; }
     }
 
     window.addEventListener('keydown', e => { if(e.code === 'Space') jump(); });
