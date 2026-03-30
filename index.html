@@ -1,119 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>ID Chat P2P</title>
-    <!-- Важно: этот скрипт должен загрузиться -->
-    <script src="https://unpkg.com"></script>
+    <title>Cyber Runner</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; background: #f4f4f9; }
-        .box { width: 350px; background: white; padding: 20px; border-radius: 10px; margin-top: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:disabled { background: #ccc; }
-        .hidden { display: none; }
-        #log { height: 200px; border: 1px solid #ddd; overflow-y: auto; padding: 10px; margin-top: 10px; font-size: 14px; }
+        body { margin: 0; background: #0a0a0c; display: flex; justify-content: center; align-items: center; height: 100vh; color: #0ff; font-family: 'Courier New', monospace; overflow: hidden; }
+        canvas { border: 2px solid #0ff; box-shadow: 0 0 20px #0ff; background: #000; cursor: crosshair; }
+        .ui { position: absolute; top: 20px; left: 20px; pointer-events: none; }
     </style>
 </head>
 <body>
-
-<div class="box">
-    <!-- Шаг 1: ID -->
-    <div id="step1">
-        <h3>Шаг 1: Придумайте ID</h3>
-        <input type="text" id="myIdInput" placeholder="Например: user123">
-        <button id="btn1" onclick="initPeer()">Создать ID</button>
-        <p id="status1" style="font-size: 12px; color: orange;"></p>
+    <div class="ui">
+        <h1>SCORE: <span id="score">0</span></h1>
+        <p>Press SPACE or CLICK to Jump</p>
     </div>
-
-    <!-- Шаг 2: Ник -->
-    <div id="step2" class="hidden">
-        <h3>Шаг 2: Ваш никнейм</h3>
-        <input type="text" id="nickInput" placeholder="Ваше имя">
-        <button onclick="saveNick()">Войти в чат</button>
-    </div>
-
-    <!-- Шаг 3: Чат -->
-    <div id="step3" class="hidden">
-        <p>Ваш ID: <b id="myIdDisplay"></b></p>
-        <input type="text" id="targetIdInput" placeholder="ID друга">
-        <button onclick="connect()">Подключиться к другу</button>
-        <div id="log"></div>
-        <input type="text" id="msgInput" placeholder="Сообщение...">
-        <button onclick="send()">Отправить</button>
-    </div>
-</div>
+    <canvas id="game"></canvas>
 
 <script>
-    let peer, conn, myNick;
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
 
-    function initPeer() {
-        const id = document.getElementById('myIdInput').value;
-        const btn = document.getElementById('btn1');
-        const stat = document.getElementById('status1');
+    canvas.width = 800;
+    canvas.height = 400;
 
-        if(!id) return alert("Введите ID");
+    let score = 0;
+    let gameActive = true;
 
-        btn.disabled = true;
-        stat.innerText = "Регистрация в сети...";
+    // Игрок
+    const player = {
+        x: 50, y: 300, w: 30, h: 30,
+        dy: 0, jumpForce: 12, gravity: 0.6,
+        grounded: false
+    };
 
-        // Создаем подключение
-        peer = new Peer(id);
+    // Препятствия
+    const obstacles = [];
+    let frame = 0;
 
-        peer.on('open', (assignedId) => {
-            document.getElementById('myIdDisplay').innerText = assignedId;
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+    function drawPlayer() {
+        ctx.fillStyle = '#0ff';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#0ff';
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        ctx.shadowBlur = 0;
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        // Гравитация и прыжок
+        player.dy += player.gravity;
+        player.y += player.dy;
+
+        if (player.y + player.h > canvas.height - 20) {
+            player.y = canvas.height - 20 - player.h;
+            player.dy = 0;
+            player.grounded = true;
+        }
+
+        // Спавн препятствий
+        frame++;
+        if (frame % 100 === 0) {
+            obstacles.push({ x: canvas.width, y: canvas.height - 50, w: 20, h: 30 });
+        }
+
+        // Движение препятствий
+        obstacles.forEach((obs, i) => {
+            obs.x -= 6 + (score / 500); // Ускорение со временем
+            
+            // Коллизия (проверка столкновения)
+            if (player.x < obs.x + obs.w && player.x + player.w > obs.x &&
+                player.y < obs.y + obs.h && player.y + player.h > obs.y) {
+                gameOver();
+            }
+
+            if (obs.x + obs.w < 0) obstacles.splice(i, 1);
         });
 
-        peer.on('error', (err) => {
-            btn.disabled = false;
-            stat.innerText = "Ошибка: этот ID занят или нет сети.";
-            console.error(err);
+        score++;
+        scoreEl.innerText = Math.floor(score / 10);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Линия пола
+        ctx.strokeStyle = '#0ff';
+        ctx.beginPath(); ctx.moveTo(0, canvas.height - 20); ctx.lineTo(canvas.width, canvas.height - 20); ctx.stroke();
+
+        drawPlayer();
+
+        ctx.fillStyle = '#f0f'; // Препятствия другого цвета
+        obstacles.forEach(obs => {
+            ctx.shadowBlur = 10; ctx.shadowColor = '#f0f';
+            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
         });
 
-        // Если кто-то подключается к нам
-        peer.on('connection', (c) => {
-            conn = c;
-            setupConn();
-        });
+        if (gameActive) {
+            update();
+            requestAnimationFrame(draw);
+        }
     }
 
-    function saveNick() {
-        myNick = document.getElementById('nickInput').value || "Аноним";
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step3').classList.remove('hidden');
+    function jump() {
+        if (player.grounded) {
+            player.dy = -player.jumpForce;
+            player.grounded = false;
+        }
     }
 
-    function connect() {
-        const targetId = document.getElementById('targetIdInput').value;
-        if(!targetId) return alert("Введите ID друга");
-        conn = peer.connect(targetId);
-        setupConn();
+    function gameOver() {
+        gameActive = false;
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.font = "40px Courier New";
+        ctx.fillText("SYSTEM CRASHED", canvas.width/4, canvas.height/2);
+        ctx.font = "20px Courier New";
+        ctx.fillText("Click to Reboot", canvas.width/3, canvas.height/2 + 40);
     }
 
-    function setupConn() {
-        conn.on('open', () => {
-            addLog("Система: Соединение установлено!");
-            conn.on('data', (data) => {
-                addLog(`${data.nick}: ${data.msg}`);
-            });
-        });
-    }
+    window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
+    canvas.addEventListener('mousedown', jump);
+    canvas.addEventListener('click', () => { if(!gameActive) location.reload(); });
 
-    function send() {
-        const msg = document.getElementById('msgInput').value;
-        if(!msg || !conn) return;
-        conn.send({ nick: myNick, msg: msg });
-        addLog(`Я: ${msg}`);
-        document.getElementById('msgInput').value = "";
-    }
-
-    function addLog(txt) {
-        const div = document.createElement('div');
-        div.innerText = txt;
-        document.getElementById('log').appendChild(div);
-    }
+    draw();
 </script>
 </body>
 </html>
