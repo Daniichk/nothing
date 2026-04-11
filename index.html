@@ -4,32 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>School Press - Feed</title>
+    <title>School Press - Discover</title>
 </head>
 <body>
     <header>
-        <div class="logo">School Press</div>
+        <div class="logo" onclick="location.href='index.html'">School Press</div>
         <div id="auth-section">
-            <button onclick="login()" id="login-btn">Login with Google</button>
-            <span id="user-display" style="display:none;"></span>
+            <button onclick="setupProfile()" id="login-btn">Login & Set Nickname</button>
+            <span id="user-display" onclick="location.href='profile.html'" style="cursor:pointer; display:none; font-weight:bold;"></span>
             <button onclick="location.href='editor.html'" id="write-btn" style="display:none;">Write Article</button>
         </div>
     </header>
 
     <main>
-        <h1>Latest Articles</h1>
-        <div id="articles-feed">
-            <!-- Articles will appear here -->
+        <div class="filter-bar">
+            <button onclick="displayArticles('All')">All</button>
+            <button onclick="displayArticles('Science')">Science</button>
+            <button onclick="displayArticles('Sports')">Sports</button>
+            <button onclick="displayArticles('Art')">Art</button>
+        </div>
+        <div id="articles-grid" class="cube-grid">
+            <!-- Articles as cubes will appear here -->
         </div>
     </main>
-
     <script src="script.js"></script>
-    <script>
-        // Load articles on page start
-        window.onload = function() {
-            displayArticles();
-            checkAuth();
-        };
-    </script>
+    <script>window.onload = () => { displayArticles(); checkAuth(); };</script>
 </body>
 </html>
