@@ -82,3 +82,64 @@
     color: #6b6b6b;
     margin-top: 50px;
 }
+/* Liquid Glass Effects */
+.glass-theme {
+    background: #eef2f6;
+    overflow-x: hidden;
+}
+
+.glass-bg-blobs {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+}
+
+.blob {
+    position: absolute; width: 500px; height: 500px;
+    filter: blur(80px); opacity: 0.4; border-radius: 50%;
+}
+.blob-1 { background: #2563eb; top: -100px; right: -100px; }
+.blob-2 { background: #60a5fa; bottom: -100px; left: -100px; }
+
+/* The Glass Panel */
+.glass-panel, .cube-card, .glass-nav {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.liquid-text {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #1e293b, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.hero-glass {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.cube-card {
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.glass-btn {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.glass-btn-primary {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
