@@ -1,80 +1,89 @@
-// Check if user is logged in
+// --- MODERATION ---
+function validateText(text, type = "content") {
+    if (text.length < 3) return "Too short!";
+    const digits = text.replace(/\D/g, "").length;
+    if (digits / text.length > 0.5) return "Too many numbers! Use letters.";
+    if (/(.)\1{4,}/.test(text)) return "Spam detected!";
+    return null;
+}
+
+// --- AUTH & NICKNAME ---
+function setupProfile() {
+    const email = prompt("Enter school email (@alu.escuelassj.com):");
+    if (!email || !email.endsWith("@alu.escuelassj.com")) return alert("Wrong domain!");
+
+    const nick = prompt("Choose a nickname (Moderated):");
+    const error = validateText(nick, "nickname");
+    if (error) return alert("Nickname Error: " + error);
+
+    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userNick", nick);
+    location.reload();
+}
+
 function checkAuth() {
-    const user = localStorage.getItem("userEmail");
-    if (user) {
+    const nick = localStorage.getItem("userNick");
+    if (nick) {
         document.getElementById('login-btn').style.display = "none";
-        document.getElementById('user-display').innerText = user;
-        document.getElementById('user-display').style.display = "inline";
+        const display = document.getElementById('user-display');
+        display.innerText = `@${nick}`;
+        display.style.display = "inline";
         document.getElementById('write-btn').style.display = "inline-block";
     }
 }
 
-// Simple Login Simulation (Requires @://escuelassj.com)
-function login() {
-    const email = prompt("Enter your school email:");
-    if (email && email.endsWith("@alu.escuelassj.com")) {
-        localStorage.setItem("userEmail", email);
-        location.reload();
-    } else {
-        alert("Access denied! Use your @alu.escuelassj.com email.");
-    }
-}
-
-// Moderation Logic
-function validateArticle(title, content) {
-    if (title.length < 5) return "Title is too short!";
-    if (content.length < 20) return "Article content is too short!";
-    
-    // Check for spam like "67 6767" (Ratio of digits)
-    const digits = content.replace(/\D/g, "").length;
-    if (digits / content.length > 0.4) return "Error: Too many numbers. Use words!";
-
-    // Check for repeated characters (aaaaa)
-    if (/(.)\1{5,}/.test(content)) return "Spam detected (repeated characters).";
-
-    return null; // OK
-}
+// --- ARTICLES ---
+function formatDoc(cmd) { document.execCommand(cmd, false, null); }
 
 function publishArticle() {
     const title = document.getElementById('title').value;
-    const content = document.getElementById('content').value;
-    const status = document.getElementById('status-msg');
+    const content = document.getElementById('content').innerHTML; // HTML из редактора
+    const icon = document.getElementById('icon').value || "📄";
+    const category = document.getElementById('category').value;
 
-    const error = validateArticle(title, content);
+    const error = validateText(title) || validateText(document.getElementById('content').innerText);
     if (error) {
-        status.innerText = error;
-        status.style.color = "red";
+        document.getElementById('status-msg').innerText = error;
         return;
     }
 
-    // Save to LocalStorage (Global for this browser session)
     const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    articles.unshift({ 
-        title, 
-        content, 
-        author: localStorage.getItem("userEmail"),
+    articles.unshift({
+        id: Date.now(),
+        title, content, icon, category,
+        author: localStorage.getItem("userNick"),
+        authorEmail: localStorage.getItem("userEmail"),
         date: new Date().toLocaleDateString()
     });
     localStorage.setItem("articles", JSON.stringify(articles));
-
-    alert("Published successfully!");
     location.href = 'index.html';
 }
 
-function displayArticles() {
-    const feed = document.getElementById('articles-feed');
+function displayArticles(filter = 'All') {
+    const grid = document.getElementById('articles-grid');
+    if (!grid) return;
     const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+    const filtered = filter === 'All' ? articles : articles.filter(a => a.category === filter);
 
-    if (articles.length === 0) {
-        feed.innerHTML = "<p>No articles yet. Be the first to write!</p>";
-        return;
-    }
-
-    feed.innerHTML = articles.map(art => `
-        <div class="article-card">
+    grid.innerHTML = filtered.map(art => `
+        <div class="cube-card">
+            <div class="card-icon">${art.icon}</div>
+            <span class="tag">${art.category}</span>
             <h3>${art.title}</h3>
-            <p>${art.content}</p>
-            <div class="meta">By: ${art.author} | ${art.date}</div>
+            <p>${art.content.substring(0, 60).replace(/<[^>]*>/g, '')}...</p>
+            <div class="card-footer">
+                <span onclick="event.stopPropagation(); followUser('${art.author}')" class="follow-link">Follow</span>
+                <strong>@${art.author}</strong>
+            </div>
         </div>
     `).join('');
+}
+
+function followUser(nick) {
+    let following = JSON.parse(localStorage.getItem("following") || "[]");
+    if (!following.includes(nick)) {
+        following.push(nick);
+        localStorage.setItem("following", JSON.stringify(following));
+        alert(`You are now following @${nick}`);
+    }
 }
