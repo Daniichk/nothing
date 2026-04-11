@@ -1,85 +1,69 @@
-// --- SUBJECTS FROM YOUR IMAGE ---
-const SCHOOL_SUBJECTS = ["MATS", "INGL", "FyQ", "LcyL", "EF", "MUS", "VAL", "ABSR", "EDPyV"];
+// --- АВТОРИЗАЦИЯ И ПРОВЕРКА ПОЧТЫ ---
+function handleAuthClick() {
+    const email = prompt("Enter your school Gmail (@alu.escuelassj.com):");
+    
+    if (!email) return;
 
-// --- MODERATION & AUTH ---
-function setupProfile() {
-    const email = prompt("School Email:");
-    if (!email || !email.endsWith("@alu.escuelassj.com")) return alert("School domain required!");
-    const nick = prompt("Choose Nickname:");
-    if (!nick || nick.length < 3 || (nick.replace(/\D/g, "").length / nick.length > 0.5)) return alert("Invalid Nickname!");
+    // 1. Проверка домена
+    if (!email.endsWith("@alu.escuelassj.com")) {
+        alert("Access Denied: Only @alu.escuelassj.com emails allowed.");
+        return;
+    }
+
+    // 2. Проверка: не занята ли эта почта уже в системе
+    const existingUser = localStorage.getItem("userEmail");
+    if (existingUser && existingUser !== email) {
+        alert("Another account is already active in this browser. Please log out first.");
+        return;
+    }
+
+    const nick = prompt("Choose your professional nickname:");
+    // Проверка ника от спама типа 67 6767
+    if (!nick || nick.length < 3 || (nick.replace(/\D/g, "").length / nick.length > 0.5)) {
+        alert("Invalid Nickname! Use letters and more than 3 characters.");
+        return;
+    }
 
     localStorage.setItem("userEmail", email);
     localStorage.setItem("userNick", nick);
     location.reload();
 }
 
-// --- ARTICLE LOGIC ---
-function publishArticle() {
-    const title = document.getElementById('title').value;
-    const content = document.getElementById('content').innerHTML;
-    const category = document.getElementById('category').value;
-    const author = localStorage.getItem("userNick");
+function checkAuth() {
+    const nick = localStorage.getItem("userNick");
+    const loginBtn = document.getElementById('login-btn');
+    const userDisplay = document.getElementById('user-display');
+    const writeBtn = document.getElementById('write-btn');
 
-    if (title.length < 5) return alert("Title too short");
-
-    const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    const newArticle = {
-        id: Date.now(),
-        title, content, category, author,
-        date: new Date().toLocaleString()
-    };
-    
-    articles.unshift(newArticle);
-    localStorage.setItem("articles", JSON.stringify(articles));
-
-    // Handle Notifications for followers
-    sendNotification(author, title);
-    
-    location.href = 'index.html';
-}
-
-function deleteArticle(id) {
-    if (!confirm("Delete this article?")) return;
-    let articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    articles = articles.filter(a => a.id !== id);
-    localStorage.setItem("articles", JSON.stringify(articles));
-    displayArticles();
-}
-
-// --- NOTIFICATIONS ---
-function sendNotification(author, title) {
-    const followers = JSON.parse(localStorage.getItem("followers_of_" + author) || "[]");
-    // In a real app, this would push to those users. 
-    // Here we simulate by flagging a global "new post" for everyone else.
-    localStorage.setItem("new_post_alert", `New from @${author}: ${title}`);
-}
-
-function checkNotifications() {
-    const alertMsg = localStorage.getItem("new_post_alert");
-    if (alertMsg) {
-        document.getElementById('notif-dot').style.display = "block";
-        document.getElementById('notif-bell').title = alertMsg;
+    if (nick) {
+        if (loginBtn) loginBtn.style.display = "none";
+        if (userDisplay) {
+            userDisplay.innerText = `@${nick}`;
+            userDisplay.style.display = "inline-block";
+        }
+        if (writeBtn) writeBtn.style.display = "inline-block";
     }
 }
 
-// --- DISPLAY ---
-function displayArticles(filter = 'All') {
-    const grid = document.getElementById('articles-grid');
-    if (!grid) return;
-    const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    const currentUser = localStorage.getItem("userNick");
+// --- ФУНКЦИЯ ПУБЛИКАЦИИ ---
+function publishArticle() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').innerText;
+    const category = document.getElementById('category').value;
+    const author = localStorage.getItem("userNick");
 
-    grid.innerHTML = articles
-        .filter(a => filter === 'All' || a.category === filter)
-        .map(art => `
-        <div class="cube-card">
-            <div class="tag">${art.category}</div>
-            <h3>${art.title}</h3>
-            <p>${art.content.substring(0, 100).replace(/<[^>]*>/g, '')}...</p>
-            <div style="display:flex; align-items:center; margin-top:auto;">
-                <small>By <b>@${art.author}</b></small>
-                ${art.author === currentUser ? `<button class="delete-btn" onclick="deleteArticle(${art.id})">Delete</button>` : ''}
-            </div>
-        </div>
-    `).join('');
+    if (title.length < 5) return alert("Title is too short!");
+
+    const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+    articles.unshift({
+        id: Date.now(),
+        title, content, category, author,
+        date: new Date().toLocaleDateString()
+    });
+    localStorage.setItem("articles", JSON.stringify(articles));
+    
+    // Уведомление о новом посте
+    localStorage.setItem("new_post_alert", `New article in ${category} by @${author}!`);
+    
+    location.href = 'index.html';
 }

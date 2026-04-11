@@ -8,7 +8,6 @@
     <title>School Press | Premium Feed</title>
 </head>
 <body class="glass-theme">
-    <!-- Фоновые градиенты для эффекта стекла -->
     <div class="glass-bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -16,15 +15,14 @@
 
     <header class="glass-nav">
         <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-        
         <div id="auth-section">
             <div id="notif-wrapper" class="glass-icon" onclick="showNotifications()">
                 <span id="bell-icon">🔔</span>
                 <div id="notif-dot"></div>
             </div>
-
-            <button onclick="setupProfile()" id="login-btn" class="glass-btn">Sign In</button>
-            <span id="user-display" onclick="location.href='profile.html'" class="user-pill"></span>
+            <!-- Ссылки теперь работают через JS проверку -->
+            <button onclick="handleAuthClick()" id="login-btn" class="glass-btn">Sign In</button>
+            <span id="user-display" onclick="location.href='profile.html'" class="user-pill" style="display:none; cursor:pointer;"></span>
             <button onclick="location.href='editor.html'" class="publish-btn glass-btn-primary" id="write-btn" style="display:none;">Write Story</button>
         </div>
     </header>
@@ -32,23 +30,17 @@
     <main>
         <section class="hero-glass">
             <h1 class="liquid-text">I will read here</h1>
-            <p>The elite digital library for @://escuelassj.com students.</p>
+            <p>The elite digital library for school students.</p>
         </section>
 
-        <!-- Subjects Navigation -->
         <div class="filter-bar glass-panel">
             <button onclick="displayArticles('All')" class="active">All Feed</button>
             <button onclick="displayArticles('MATS')">MATS</button>
             <button onclick="displayArticles('INGL')">INGL</button>
             <button onclick="displayArticles('FyQ')">FyQ</button>
-            <button onclick="displayArticles('LcyL')">LcyL</button>
-            <button onclick="displayArticles('EF')">EF</button>
-            <button onclick="displayArticles('MUS')">MUS</button>
         </div>
 
-        <div id="articles-grid" class="cube-grid">
-            <!-- Articles will appear as glass cards -->
-        </div>
+        <div id="articles-grid" class="cube-grid"></div>
     </main>
 
     <script src="script.js"></script>
@@ -56,15 +48,7 @@
         window.onload = () => {
             checkAuth();
             displayArticles();
-            checkNotifications();
         };
-
-        function showNotifications() {
-            const msg = localStorage.getItem("new_post_alert") || "All caught up!";
-            alert(msg);
-            localStorage.removeItem("new_post_alert");
-            document.getElementById('notif-dot').style.display = "none";
-        }
     </script>
 </body>
 </html>
