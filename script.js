@@ -12,11 +12,11 @@ function checkAuth() {
 // Simple Login Simulation (Requires @://escuelassj.com)
 function login() {
     const email = prompt("Enter your school email:");
-    if (email && email.endsWith("@://escuelassj.com")) {
+    if (email && email.endsWith("@escuelassj.com")) {
         localStorage.setItem("userEmail", email);
         location.reload();
     } else {
-        alert("Access denied! Use your @://escuelassj.com email.");
+        alert("Access denied! Use your @escuelassj.com email.");
     }
 }
 
