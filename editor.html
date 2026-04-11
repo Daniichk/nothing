@@ -2,19 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Create New Article</title>
+    <title>Create Article</title>
 </head>
 <body>
     <div class="editor-container">
-        <h2>New Article</h2>
-        <input type="text" id="title" placeholder="Enter title...">
-        <textarea id="content" placeholder="Write your content here... (minimum 20 characters)"></textarea>
+        <h2>Create Professional Article</h2>
+        <input type="text" id="title" placeholder="Article Title...">
+        <div class="row">
+            <select id="category">
+                <option value="General">Category: General</option>
+                <option value="Science">Science</option>
+                <option value="Sports">Sports</option>
+                <option value="Art">Art</option>
+            </select>
+            <input type="text" id="icon" placeholder="Icon URL or Emoji (e.g. 🚀)">
+        </div>
+        <!-- Простой профессиональный редактор: панель инструментов -->
+        <div class="toolbar">
+            <button onclick="formatDoc('bold')"><b>B</b></button>
+            <button onclick="formatDoc('italic')"><i>I</i></button>
+            <button onclick="formatDoc('insertUnorderedList')">• List</button>
+        </div>
+        <div id="content" contenteditable="true" class="rich-editor" placeholder="Write here..."></div>
+        
         <p id="status-msg"></p>
         <div class="actions">
-            <button onclick="publishArticle()" class="publish-btn">Publish</button>
-            <button onclick="location.href='index.html'">Back to Feed</button>
+            <button onclick="publishArticle()" class="publish-btn">Publish Article</button>
+            <button onclick="location.href='index.html'">Cancel</button>
         </div>
     </div>
     <script src="script.js"></script>
