@@ -4,43 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <!-- Подключаем премиальный шрифт Inter -->
     <link href="https://googleapis.com" rel="stylesheet">
-    <title>School Press | Premium Feed</title>
+    <title>School Press | Discover</title>
 </head>
 <body class="glass-theme">
+
+    <!-- Динамический фон (Жидкое стекло) -->
     <div class="glass-bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <header class="glass-nav">
         <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+        
         <div id="auth-section">
             <div id="notif-wrapper" class="glass-icon" onclick="showNotifications()">
                 <span id="bell-icon">🔔</span>
                 <div id="notif-dot"></div>
             </div>
-            <!-- Ссылки теперь работают через JS проверку -->
+
             <button onclick="handleAuthClick()" id="login-btn" class="glass-btn">Sign In</button>
-            <span id="user-display" onclick="location.href='profile.html'" class="user-pill" style="display:none; cursor:pointer;"></span>
-            <button onclick="location.href='editor.html'" class="publish-btn glass-btn-primary" id="write-btn" style="display:none;">Write Story</button>
+            <span id="user-display" onclick="location.href='profile.html'" class="user-pill" style="display:none;"></span>
+            <button onclick="location.href='editor.html'" class="btn-primary" id="write-btn" style="display:none;">Write Story</button>
         </div>
     </header>
 
     <main>
-        <section class="hero-glass">
-            <h1 class="liquid-text">I will read here</h1>
-            <p>The elite digital library for school students.</p>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="liquid-text">I will read here.</h1>
+            <p class="hero-subtext">The premium digital workspace for <span>@://escuelassj.com</span> scholars.</p>
         </section>
 
-        <div class="filter-bar glass-panel">
-            <button onclick="displayArticles('All')" class="active">All Feed</button>
-            <button onclick="displayArticles('MATS')">MATS</button>
-            <button onclick="displayArticles('INGL')">INGL</button>
-            <button onclick="displayArticles('FyQ')">FyQ</button>
+        <!-- Subjects Navigation (Все темы из расписания) -->
+        <div class="subjects-container glass-panel">
+            <div class="filter-scroll">
+                <button onclick="displayArticles('All')" class="filter-btn active">All Feed</button>
+                <button onclick="displayArticles('MATS')" class="filter-btn">Mathematics</button>
+                <button onclick="displayArticles('INGL')" class="filter-btn">English</button>
+                <button onclick="displayArticles('FyQ')" class="filter-btn">Physics & Chemistry</button>
+                <button onclick="displayArticles('LcyL')" class="filter-btn">Spanish</button>
+                <button onclick="displayArticles('EF')" class="filter-btn">Physical Education</button>
+                <button onclick="displayArticles('MUS')" class="filter-btn">Music</button>
+                <button onclick="displayArticles('VAL')" class="filter-btn">Valencian</button>
+                <button onclick="displayArticles('EDPyV')" class="filter-btn">Art & Design</button>
+            </div>
         </div>
 
-        <div id="articles-grid" class="cube-grid"></div>
+        <!-- Article Grid -->
+        <div id="articles-grid" class="cube-grid">
+            <!-- Статьи будут загружены сюда как стеклянные карточки -->
+        </div>
     </main>
 
     <script src="script.js"></script>
@@ -48,7 +65,15 @@
         window.onload = () => {
             checkAuth();
             displayArticles();
+            checkNotifications();
         };
+
+        function showNotifications() {
+            const msg = localStorage.getItem("new_post_alert") || "No new updates from authors you follow.";
+            alert(msg);
+            localStorage.removeItem("new_post_alert");
+            document.getElementById('notif-dot').style.display = "none";
+        }
     </script>
 </body>
 </html>
