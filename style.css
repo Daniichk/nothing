@@ -1,145 +1,92 @@
-/* Medium Container */
-.medium-container {
-    max-width: 700px;
-    margin: 4rem auto;
-    padding: 0 20px;
-}
-
-/* Profile Section */
-.profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-}
-
-#profile-pic {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    object-fit: cover;
-}
-
-.profile-info h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    color: #242424;
-}
-
-.stats {
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #6b6b6b;
-}
-
-/* Post Layout (Medium Style) */
-.medium-post {
-    padding: 24px 0;
-    border-bottom: 1px solid #f2f2f2;
-}
-
-.medium-post h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 8px 0;
-    color: #242424;
-}
-
-.medium-post p {
-    color: #6b6b6b;
-    font-size: 1rem;
-    line-height: 1.4;
-}
-
-.post-meta {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 0.85rem;
-    color: #6b6b6b;
-    margin-top: 12px;
-}
-
-.divider {
-    border: 0;
-    border-top: 1px solid #f2f2f2;
-    margin: 2rem 0;
-}
-
-.edit-btn {
-    border: 1px solid #1a8917;
-    color: #1a8917;
-    background: transparent;
-    border-radius: 20px;
-    padding: 5px 15px;
-    font-size: 0.8rem;
-}
-
-.empty-state {
-    text-align: center;
-    color: #6b6b6b;
-    margin-top: 50px;
-}
-/* Liquid Glass Effects */
-.glass-theme {
-    background: #eef2f6;
+/* --- GLOBAL RESET & BASE --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    font-family: 'Inter', -apple-system, sans-serif; 
+    color: #1e293b; 
+    line-height: 1.6;
+    background: #f1f5f9;
     overflow-x: hidden;
 }
 
+/* --- LIQUID GLASS BACKGROUND --- */
 .glass-bg-blobs {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: -1;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; overflow: hidden;
 }
+.blob { position: absolute; width: 600px; height: 600px; filter: blur(100px); opacity: 0.5; border-radius: 50%; }
+.blob-1 { background: #60a5fa; top: -200px; right: -100px; }
+.blob-2 { background: #dbeafe; bottom: -200px; left: -100px; }
 
-.blob {
-    position: absolute; width: 500px; height: 500px;
-    filter: blur(80px); opacity: 0.4; border-radius: 50%;
-}
-.blob-1 { background: #2563eb; top: -100px; right: -100px; }
-.blob-2 { background: #60a5fa; bottom: -100px; left: -100px; }
-
-/* The Glass Panel */
-.glass-panel, .cube-card, .glass-nav {
+/* --- FORTUNE 500 NAVIGATION --- */
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 10%;
     background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    position: sticky; top: 0; z-index: 1000;
 }
+.logo { font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; cursor: pointer; }
+.logo span { color: #2563eb; }
 
+/* --- HERO SECTION (I WILL READ HERE) --- */
+.hero-glass { text-align: center; padding: 120px 20px; }
 .liquid-text {
-    font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, #1e293b, #2563eb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
+    font-size: 5rem; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
 }
 
-.hero-glass {
-    text-align: center;
-    padding: 100px 20px;
+/* --- SUBJECT FILTER BAR --- */
+.filter-bar {
+    display: flex; justify-content: center; gap: 12px;
+    padding: 20px; flex-wrap: wrap; margin-bottom: 40px;
 }
+button, .glass-btn {
+    padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+    font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+button:hover { transform: translateY(-3px); background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.publish-btn { background: #2563eb; color: white; border: none; }
 
+/* --- ARTICLE GRID (CUBE CARDS) --- */
+.cube-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px; padding: 0 10% 100px;
+}
 .cube-card {
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 24px; padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cube-card:hover { transform: scale(1.02); background: white; }
+.tag { font-size: 0.7rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 5px 12px; border-radius: 50px; margin-bottom: 15px; display: inline-block; }
+
+/* --- MEDIUM-STYLE PROFILE PAGE --- */
+.medium-container { max-width: 720px; margin: 4rem auto; padding: 0 24px; }
+.profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+#profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.profile-info h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+
+.medium-post { padding: 32px 0; border-bottom: 1px solid #e2e8f0; }
+.medium-post h3 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 10px 0; }
+.medium-post p { color: #475569; font-size: 1.1rem; }
+
+/* --- NOTIFICATIONS --- */
+#notif-wrapper { position: relative; cursor: pointer; padding: 10px; font-size: 1.3rem; }
+#notif-dot { 
+    position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; 
+    background: #ef4444; border: 2px solid white; border-radius: 50%; display: none; 
 }
 
-.glass-btn {
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(4px);
-    font-weight: 600;
-    border-radius: 12px;
-}
+/* --- EDITOR STYLES --- */
+.editor-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+.rich-editor { min-height: 400px; font-size: 1.2rem; border: none; outline: none; margin-top: 20px; }
+.rich-editor:empty:before { content: attr(data-placeholder); color: #cbd5e1; }
 
-.glass-btn-primary {
-    background: #2563eb;
-    color: white;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-}
-
+.delete-btn { color: #ef4444; background: none; border: none; font-size: 0.9rem; font-weight: 700; padding: 0; margin-left: auto; }
