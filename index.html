@@ -4,30 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>School Press - Discover</title>
+    <title>School Press | Corporate Feed</title>
 </head>
 <body>
     <header>
-        <div class="logo" onclick="location.href='index.html'">School Press</div>
+        <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+        
         <div id="auth-section">
-            <button onclick="setupProfile()" id="login-btn">Login & Set Nickname</button>
-            <span id="user-display" onclick="location.href='profile.html'" style="cursor:pointer; display:none; font-weight:bold;"></span>
-            <button onclick="location.href='editor.html'" id="write-btn" style="display:none;">Write Article</button>
+            <!-- Notification System -->
+            <div id="notif-wrapper" onclick="showNotifications()">
+                <span id="bell-icon">🔔</span>
+                <div id="notif-dot"></div>
+            </div>
+
+            <button onclick="setupProfile()" id="login-btn">Sign In</button>
+            <span id="user-display" onclick="location.href='profile.html'"></span>
+            <button onclick="location.href='editor.html'" class="publish-btn" id="write-btn" style="display:none;">Create Article</button>
         </div>
     </header>
 
     <main>
+        <section class="hero">
+            <h1>Knowledge Sharing for Schools</h1>
+            <p>Read articles from your classmates based on your subjects.</p>
+        </section>
+
+        <!-- Subjects from your schedule image -->
         <div class="filter-bar">
-            <button onclick="displayArticles('All')">All</button>
-            <button onclick="displayArticles('Science')">Science</button>
-            <button onclick="displayArticles('Sports')">Sports</button>
-            <button onclick="displayArticles('Art')">Art</button>
+            <button onclick="displayArticles('All')" class="active">All Feed</button>
+            <button onclick="displayArticles('MATS')">Math</button>
+            <button onclick="displayArticles('INGL')">English</button>
+            <button onclick="displayArticles('FyQ')">Physics</button>
+            <button onclick="displayArticles('LcyL')">Spanish</button>
+            <button onclick="displayArticles('EF')">Sports</button>
+            <button onclick="displayArticles('MUS')">Music</button>
         </div>
+
         <div id="articles-grid" class="cube-grid">
-            <!-- Articles as cubes will appear here -->
+            <!-- Modern article cards will be injected here -->
         </div>
     </main>
+
     <script src="script.js"></script>
-    <script>window.onload = () => { displayArticles(); checkAuth(); };</script>
+    <script>
+        window.onload = () => {
+            checkAuth();
+            displayArticles();
+            checkNotifications();
+        };
+
+        function showNotifications() {
+            const msg = localStorage.getItem("new_post_alert") || "No new updates from authors you follow.";
+            alert(msg);
+            localStorage.removeItem("new_post_alert");
+            document.getElementById('notif-dot').style.display = "none";
+        }
+    </script>
 </body>
 </html>
