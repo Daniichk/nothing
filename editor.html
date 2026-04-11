@@ -2,32 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Editor | School Press</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <title>Professional Editor | School Press</title>
 </head>
-<body>
-    <header class="glass-nav">
-        <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-        <button onclick="location.href='index.html'" class="glass-btn">Exit</button>
+<body class="editor-body">
+
+    <!-- Header / Navigation -->
+    <header class="editor-nav">
+        <div class="nav-left">
+            <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+            <span class="document-status">Drafting Story...</span>
+        </div>
+        <div class="nav-right">
+            <button onclick="location.href='index.html'" class="btn-secondary">Cancel</button>
+            <button onclick="publishArticle()" class="btn-primary">Publish Article</button>
+        </div>
     </header>
 
-    <div class="editor-page">
-        <div class="editor-container glass-panel">
-            <h2>Draft New Article</h2>
-            <input type="text" id="title" placeholder="Article Title...">
-            <select id="category">
-                <option value="MATS">Mathematics</option>
-                <option value="INGL">English</option>
-                <option value="FyQ">Physics</option>
-            </select>
-            <div id="content" contenteditable="true" class="rich-editor" data-placeholder="Start writing..."></div>
-            <button onclick="publishArticle()" class="publish-btn glass-btn-primary">Publish</button>
+    <main class="editor-main">
+        <!-- Floating Toolbar like in Word/Medium -->
+        <div class="editor-toolbar glass-panel">
+            <div class="tool-group">
+                <select onchange="format('formatBlock', this.value)">
+                    <option value="p">Normal Text</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                </select>
+            </div>
+            <div class="tool-separator"></div>
+            <div class="tool-group">
+                <button onclick="format('bold')" title="Bold"><b>B</b></button>
+                <button onclick="format('italic')" title="Italic"><i>I</i></button>
+                <button onclick="format('underline')" title="Underline"><u>U</u></button>
+                <button onclick="format('strikeThrough')" title="Strike">S̶</button>
+            </div>
+            <div class="tool-separator"></div>
+            <div class="tool-group">
+                <button onclick="format('insertUnorderedList')">• List</button>
+                <button onclick="format('insertOrderedList')">1. List</button>
+                <button onclick="format('justifyLeft')">Left</button>
+                <button onclick="format('justifyCenter')">Center</button>
+            </div>
+            <div class="tool-separator"></div>
+            <div class="tool-group">
+                <button onclick="insertLink()">Link</button>
+                <button onclick="format('removeFormat')">Clear</button>
+            </div>
         </div>
-    </div>
+
+        <!-- Document Area -->
+        <div class="document-page shadow-premium">
+            <input type="text" id="title" class="title-input" placeholder="Enter your title here..." spellcheck="false">
+            <div class="meta-row">
+                <select id="category" class="minimal-select">
+                    <option value="MATS">Mathematics</option>
+                    <option value="INGL">English</option>
+                    <option value="FyQ">Physics & Chemistry</option>
+                    <option value="LcyL">Spanish Literature</option>
+                </select>
+                <input type="text" id="icon" class="minimal-input" placeholder="Add Icon (e.g. 📚)">
+            </div>
+            <hr class="editor-divider">
+            <div id="content" contenteditable="true" class="main-writing-area" data-placeholder="Start your story here..."></div>
+        </div>
+    </main>
+
     <script src="script.js"></script>
     <script>
-        // Блокируем доступ без логина
-        if (!localStorage.getItem("userEmail")) location.href = 'index.html';
+        // Команды форматирования
+        function format(cmd, value = null) {
+            document.execCommand(cmd, false, value);
+            document.getElementById('content').focus();
+        }
+
+        function insertLink() {
+            const url = prompt("Enter the URL:");
+            if(url) format('createLink', url);
+        }
+
+        // Блокировка доступа без логина
+        if (!localStorage.getItem("userEmail")) {
+            alert("Please sign in first!");
+            location.href = 'index.html';
+        }
     </script>
 </body>
 </html>

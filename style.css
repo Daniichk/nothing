@@ -90,3 +90,50 @@ button:hover { transform: translateY(-3px); background: white; box-shadow: 0 10p
 .rich-editor:empty:before { content: attr(data-placeholder); color: #cbd5e1; }
 
 .delete-btn { color: #ef4444; background: none; border: none; font-size: 0.9rem; font-weight: 700; padding: 0; margin-left: auto; }
+.editor-body { background: #f0f2f5; min-height: 100vh; }
+
+.editor-nav {
+    height: 60px; background: white; border-bottom: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2rem; position: sticky; top: 0; z-index: 100;
+}
+
+.editor-main { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+
+/* Floating Toolbar */
+.editor-toolbar {
+    position: sticky; top: 80px; z-index: 99;
+    display: flex; gap: 8px; padding: 8px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px;
+}
+
+.tool-group button, .tool-group select {
+    padding: 8px 12px; border: none; background: transparent;
+    border-radius: 6px; cursor: pointer; font-weight: 600; color: #475569;
+}
+.tool-group button:hover { background: #f1f5f9; color: #2563eb; }
+.tool-separator { width: 1px; background: #e2e8f0; margin: 5px 2px; }
+
+/* Document Paper Style */
+.document-page {
+    width: 100%; max-width: 850px; min-height: 1000px;
+    background: white; padding: 60px 80px; border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.title-input {
+    width: 100%; border: none; font-size: 3rem; font-weight: 800;
+    outline: none; margin-bottom: 20px; color: #1e293b;
+}
+
+.main-writing-area {
+    min-height: 500px; outline: none; font-size: 1.15rem;
+    color: #334155; line-height: 1.8;
+}
+
+.main-writing-area:empty:before {
+    content: attr(data-placeholder); color: #cbd5e1;
+}
+
+.editor-divider { border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0; }
