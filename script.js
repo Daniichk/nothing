@@ -1,89 +1,85 @@
-// --- MODERATION ---
-function validateText(text, type = "content") {
-    if (text.length < 3) return "Too short!";
-    const digits = text.replace(/\D/g, "").length;
-    if (digits / text.length > 0.5) return "Too many numbers! Use letters.";
-    if (/(.)\1{4,}/.test(text)) return "Spam detected!";
-    return null;
-}
+// --- SUBJECTS FROM YOUR IMAGE ---
+const SCHOOL_SUBJECTS = ["MATS", "INGL", "FyQ", "LcyL", "EF", "MUS", "VAL", "ABSR", "EDPyV"];
 
-// --- AUTH & NICKNAME ---
+// --- MODERATION & AUTH ---
 function setupProfile() {
-    const email = prompt("Enter school email (@alu.escuelassj.com):");
-    if (!email || !email.endsWith("@alu.escuelassj.com")) return alert("Wrong domain!");
-
-    const nick = prompt("Choose a nickname (Moderated):");
-    const error = validateText(nick, "nickname");
-    if (error) return alert("Nickname Error: " + error);
+    const email = prompt("School Email:");
+    if (!email || !email.endsWith("@://escuelassj.com")) return alert("School domain required!");
+    const nick = prompt("Choose Nickname:");
+    if (!nick || nick.length < 3 || (nick.replace(/\D/g, "").length / nick.length > 0.5)) return alert("Invalid Nickname!");
 
     localStorage.setItem("userEmail", email);
     localStorage.setItem("userNick", nick);
     location.reload();
 }
 
-function checkAuth() {
-    const nick = localStorage.getItem("userNick");
-    if (nick) {
-        document.getElementById('login-btn').style.display = "none";
-        const display = document.getElementById('user-display');
-        display.innerText = `@${nick}`;
-        display.style.display = "inline";
-        document.getElementById('write-btn').style.display = "inline-block";
-    }
-}
-
-// --- ARTICLES ---
-function formatDoc(cmd) { document.execCommand(cmd, false, null); }
-
+// --- ARTICLE LOGIC ---
 function publishArticle() {
     const title = document.getElementById('title').value;
-    const content = document.getElementById('content').innerHTML; // HTML из редактора
-    const icon = document.getElementById('icon').value || "📄";
+    const content = document.getElementById('content').innerHTML;
     const category = document.getElementById('category').value;
+    const author = localStorage.getItem("userNick");
 
-    const error = validateText(title) || validateText(document.getElementById('content').innerText);
-    if (error) {
-        document.getElementById('status-msg').innerText = error;
-        return;
-    }
+    if (title.length < 5) return alert("Title too short");
 
     const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    articles.unshift({
+    const newArticle = {
         id: Date.now(),
-        title, content, icon, category,
-        author: localStorage.getItem("userNick"),
-        authorEmail: localStorage.getItem("userEmail"),
-        date: new Date().toLocaleDateString()
-    });
+        title, content, category, author,
+        date: new Date().toLocaleString()
+    };
+    
+    articles.unshift(newArticle);
     localStorage.setItem("articles", JSON.stringify(articles));
+
+    // Handle Notifications for followers
+    sendNotification(author, title);
+    
     location.href = 'index.html';
 }
 
+function deleteArticle(id) {
+    if (!confirm("Delete this article?")) return;
+    let articles = JSON.parse(localStorage.getItem("articles") || "[]");
+    articles = articles.filter(a => a.id !== id);
+    localStorage.setItem("articles", JSON.stringify(articles));
+    displayArticles();
+}
+
+// --- NOTIFICATIONS ---
+function sendNotification(author, title) {
+    const followers = JSON.parse(localStorage.getItem("followers_of_" + author) || "[]");
+    // In a real app, this would push to those users. 
+    // Here we simulate by flagging a global "new post" for everyone else.
+    localStorage.setItem("new_post_alert", `New from @${author}: ${title}`);
+}
+
+function checkNotifications() {
+    const alertMsg = localStorage.getItem("new_post_alert");
+    if (alertMsg) {
+        document.getElementById('notif-dot').style.display = "block";
+        document.getElementById('notif-bell').title = alertMsg;
+    }
+}
+
+// --- DISPLAY ---
 function displayArticles(filter = 'All') {
     const grid = document.getElementById('articles-grid');
     if (!grid) return;
     const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-    const filtered = filter === 'All' ? articles : articles.filter(a => a.category === filter);
+    const currentUser = localStorage.getItem("userNick");
 
-    grid.innerHTML = filtered.map(art => `
+    grid.innerHTML = articles
+        .filter(a => filter === 'All' || a.category === filter)
+        .map(art => `
         <div class="cube-card">
-            <div class="card-icon">${art.icon}</div>
-            <span class="tag">${art.category}</span>
+            <div class="tag">${art.category}</div>
             <h3>${art.title}</h3>
-            <p>${art.content.substring(0, 60).replace(/<[^>]*>/g, '')}...</p>
-            <div class="card-footer">
-                <span onclick="event.stopPropagation(); followUser('${art.author}')" class="follow-link">Follow</span>
-                <strong>@${art.author}</strong>
+            <p>${art.content.substring(0, 100).replace(/<[^>]*>/g, '')}...</p>
+            <div style="display:flex; align-items:center; margin-top:auto;">
+                <small>By <b>@${art.author}</b></small>
+                ${art.author === currentUser ? `<button class="delete-btn" onclick="deleteArticle(${art.id})">Delete</button>` : ''}
             </div>
         </div>
     `).join('');
-}
-
-function followUser(nick) {
-    let following = JSON.parse(localStorage.getItem("following") || "[]");
-    if (!following.includes(nick)) {
-        following.push(nick);
-        localStorage.setItem("following", JSON.stringify(following));
-        alert(`You are now following @${nick}`);
-    }
 }
