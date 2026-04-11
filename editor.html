@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Create New Article</title>
+</head>
+<body>
+    <div class="editor-container">
+        <h2>New Article</h2>
+        <input type="text" id="title" placeholder="Enter title...">
+        <textarea id="content" placeholder="Write your content here... (minimum 20 characters)"></textarea>
+        <p id="status-msg"></p>
+        <div class="actions">
+            <button onclick="publishArticle()" class="publish-btn">Publish</button>
+            <button onclick="location.href='index.html'">Back to Feed</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
