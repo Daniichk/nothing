@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Your Profile | School Press</title>
+</head>
+<body class="profile-page">
+    <header>
+        <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+        <div id="auth-section">
+            <button onclick="location.href='editor.html'" class="publish-btn">Write</button>
+            <button onclick="location.href='index.html'" class="secondary-btn">Home</button>
+        </div>
+    </header>
+
+    <main class="medium-container">
+        <!-- Profile Header -->
+        <section class="profile-header">
+            <div class="profile-info">
+                <img id="profile-pic" src="https://ui-avatars.com" alt="Profile">
+                <h1 id="display-nick">@Nickname</h1>
+                <p id="display-email" class="meta">student@://escuelassj.com</p>
+                <div class="stats">
+                    <span><strong id="post-count">0</strong> Articles</span> • 
+                    <span><strong id="follow-count">0</strong> Following</span>
+                </div>
+            </div>
+            <button class="edit-btn" onclick="setupProfile()">Edit Profile</button>
+        </section>
+
+        <hr class="divider">
+
+        <!-- User's Articles -->
+        <section class="user-articles">
+            <h2>Your Stories</h2>
+            <div id="my-articles-list" class="medium-feed">
+                <!-- Articles will look like Medium posts here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        window.onload = () => {
+            const nick = localStorage.getItem("userNick");
+            const email = localStorage.getItem("userEmail");
+            
+            if (!nick) {
+                location.href = 'index.html';
+                return;
+            }
+
+            // Update Profile Info
+            document.getElementById('display-nick').innerText = `@${nick}`;
+            document.getElementById('display-email').innerText = email;
+            document.getElementById('profile-pic').src = `https://ui-avatars.com{nick}&background=random&size=128`;
+            
+            displayMyArticles();
+        };
+
+        function displayMyArticles() {
+            const list = document.getElementById('my-articles-list');
+            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+            const myNick = localStorage.getItem("userNick");
+            const myArticles = articles.filter(a => a.author === myNick);
+
+            document.getElementById('post-count').innerText = myArticles.length;
+            document.getElementById('follow-count').innerText = JSON.parse(localStorage.getItem("following") || "[]").length;
+
+            if (myArticles.length === 0) {
+                list.innerHTML = `<p class="empty-state">You haven't written any stories yet. <a href="editor.html">Start writing</a>.</p>`;
+                return;
+            }
+
+            list.innerHTML = myArticles.map(art => `
+                <div class="medium-post">
+                    <div class="post-content">
+                        <span class="tag">${art.category}</span>
+                        <h3>${art.title}</h3>
+                        <p>${art.content.substring(0, 150).replace(/<[^>]*>/g, '')}...</p>
+                        <div class="post-meta">
+                            <span>${art.date}</span> • 
+                            <button class="delete-btn" onclick="deleteArticle(${art.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
