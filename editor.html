@@ -2,36 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Create Article</title>
+    <title>Editor | School Press</title>
 </head>
 <body>
-    <div class="editor-container">
-        <h2>Create Professional Article</h2>
-        <input type="text" id="title" placeholder="Article Title...">
-        <div class="row">
-            <select id="category">
-                <option value="General">Category: General</option>
-                <option value="Science">Science</option>
-                <option value="Sports">Sports</option>
-                <option value="Art">Art</option>
-            </select>
-            <input type="text" id="icon" placeholder="Icon URL or Emoji (e.g. 🚀)">
-        </div>
-        <!-- Простой профессиональный редактор: панель инструментов -->
-        <div class="toolbar">
-            <button onclick="formatDoc('bold')"><b>B</b></button>
-            <button onclick="formatDoc('italic')"><i>I</i></button>
-            <button onclick="formatDoc('insertUnorderedList')">• List</button>
-        </div>
-        <div id="content" contenteditable="true" class="rich-editor" placeholder="Write here..."></div>
-        
-        <p id="status-msg"></p>
-        <div class="actions">
-            <button onclick="publishArticle()" class="publish-btn">Publish Article</button>
-            <button onclick="location.href='index.html'">Cancel</button>
+    <header>
+        <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+        <button onclick="location.href='index.html'" class="secondary-btn">Exit Editor</button>
+    </header>
+
+    <div class="editor-page">
+        <div class="editor-container">
+            <div class="editor-header">
+                <h2>Draft New Article</h2>
+                <p>Ensure your content meets the school moderation standards.</p>
+            </div>
+
+            <div class="input-group">
+                <label>Article Title</label>
+                <input type="text" id="title" placeholder="e.g. Analysis of FyQ Lab Results">
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Category (From Timetable)</label>
+                    <select id="category">
+                        <option value="MATS">MATS (Mathematics)</option>
+                        <option value="INGL">INGL (English)</option>
+                        <option value="FyQ">FyQ (Physics & Chemistry)</option>
+                        <option value="LcyL">LcyL (Spanish Language)</option>
+                        <option value="EF">EF (Physical Education)</option>
+                        <option value="MUS">MUS (Music)</option>
+                        <option value="ABSR">ABSR (Social Studies)</option>
+                        <option value="VAL">VAL (Valencian)</option>
+                        <option value="EDPyV">EDPyV (Arts)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Article Icon (Emoji)</label>
+                    <input type="text" id="icon" placeholder="🚀, 📚, ⚽...">
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <button onclick="document.execCommand('bold',false,null)"><b>B</b></button>
+                <button onclick="document.execCommand('italic',false,null)"><i>I</i></button>
+                <button onclick="document.execCommand('insertUnorderedList',false,null)">List</button>
+            </div>
+            
+            <div id="content" contenteditable="true" class="rich-editor" data-placeholder="Start writing your article here..."></div>
+            
+            <p id="status-msg"></p>
+            
+            <div class="editor-footer">
+                <button onclick="publishArticle()" class="publish-btn">Publish to School Feed</button>
+            </div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
