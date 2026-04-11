@@ -4,7 +4,7 @@ const SCHOOL_SUBJECTS = ["MATS", "INGL", "FyQ", "LcyL", "EF", "MUS", "VAL", "ABS
 // --- MODERATION & AUTH ---
 function setupProfile() {
     const email = prompt("School Email:");
-    if (!email || !email.endsWith("@://escuelassj.com")) return alert("School domain required!");
+    if (!email || !email.endsWith("@alu.escuelassj.com")) return alert("School domain required!");
     const nick = prompt("Choose Nickname:");
     if (!nick || nick.length < 3 || (nick.replace(/\D/g, "").length / nick.length > 0.5)) return alert("Invalid Nickname!");
 
