@@ -2,92 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Your Profile | School Press</title>
+    <title>Profile | School Press</title>
 </head>
-<body class="profile-page">
-    <header>
+<body class="social-profile">
+    <header class="glass-nav">
         <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-        <div id="auth-section">
-            <button onclick="location.href='editor.html'" class="publish-btn">Write</button>
-            <button onclick="location.href='index.html'" class="secondary-btn">Home</button>
-        </div>
+        <button onclick="location.href='index.html'" class="glass-btn">Home Feed</button>
     </header>
 
-    <main class="medium-container">
-        <!-- Profile Header -->
-        <section class="profile-header">
-            <div class="profile-info">
-                <img id="profile-pic" src="https://ui-avatars.com" alt="Profile">
-                <h1 id="display-nick">@Nickname</h1>
-                <p id="display-email" class="meta">student@://escuelassj.com</p>
-                <div class="stats">
-                    <span><strong id="post-count">0</strong> Articles</span> • 
-                    <span><strong id="follow-count">0</strong> Following</span>
+    <main class="social-container">
+        <section class="profile-card glass-panel">
+            <div class="profile-main">
+                <img id="profile-pic" src="" alt="Avatar">
+                <div class="profile-info">
+                    <h2 id="display-nick">@nickname</h2>
+                    <div class="social-stats">
+                        <div class="stat-item">
+                            <span id="total-wires" class="stat-num">0</span>
+                            <span class="stat-label">Total Wires</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="post-count" class="stat-num">0</span>
+                            <span class="stat-label">Articles</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button class="edit-btn" onclick="setupProfile()">Edit Profile</button>
         </section>
 
-        <hr class="divider">
-
-        <!-- User's Articles -->
-        <section class="user-articles">
-            <h2>Your Stories</h2>
-            <div id="my-articles-list" class="medium-feed">
-                <!-- Articles will look like Medium posts here -->
-            </div>
-        </section>
+        <div id="my-articles-grid" class="social-grid"></div>
     </main>
 
     <script src="script.js"></script>
     <script>
         window.onload = () => {
             const nick = localStorage.getItem("userNick");
-            const email = localStorage.getItem("userEmail");
-            
-            if (!nick) {
-                location.href = 'index.html';
-                return;
-            }
+            if (!nick) return location.href = 'index.html';
 
-            // Update Profile Info
             document.getElementById('display-nick').innerText = `@${nick}`;
-            document.getElementById('display-email').innerText = email;
-            document.getElementById('profile-pic').src = `https://ui-avatars.com{nick}&background=random&size=128`;
-            
-            displayMyArticles();
-        };
+            document.getElementById('profile-pic').src = `https://ui-avatars.com{nick}&background=random&size=150`;
 
-        function displayMyArticles() {
-            const list = document.getElementById('my-articles-list');
+            // Считаем статьи и "Wires"
             const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-            const myNick = localStorage.getItem("userNick");
-            const myArticles = articles.filter(a => a.author === myNick);
+            const myArticles = articles.filter(a => a.author === nick);
+            const totalWires = myArticles.reduce((sum, art) => sum + (art.views || 0), 0);
 
             document.getElementById('post-count').innerText = myArticles.length;
-            document.getElementById('follow-count').innerText = JSON.parse(localStorage.getItem("following") || "[]").length;
+            document.getElementById('total-wires').innerText = totalWires;
 
-            if (myArticles.length === 0) {
-                list.innerHTML = `<p class="empty-state">You haven't written any stories yet. <a href="editor.html">Start writing</a>.</p>`;
-                return;
-            }
-
-            list.innerHTML = myArticles.map(art => `
-                <div class="medium-post">
-                    <div class="post-content">
-                        <span class="tag">${art.category}</span>
-                        <h3>${art.title}</h3>
-                        <p>${art.content.substring(0, 150).replace(/<[^>]*>/g, '')}...</p>
-                        <div class="post-meta">
-                            <span>${art.date}</span> • 
-                            <button class="delete-btn" onclick="deleteArticle(${art.id})">Delete</button>
-                        </div>
+            const grid = document.getElementById('my-articles-grid');
+            grid.innerHTML = myArticles.map(art => `
+                <div class="social-square">
+                    <div class="square-data">
+                        <h4>${art.title}</h4>
+                        <div class="square-stats">❤️ ${art.likes || 0} | 👁 ${art.views || 0}</div>
                     </div>
+                    <button class="del-btn" onclick="deleteArticle(${art.id})">×</button>
                 </div>
             `).join('');
-        }
+        };
     </script>
 </body>
 </html>
