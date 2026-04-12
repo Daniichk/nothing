@@ -2,26 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <title>Profile | School Press</title>
 </head>
-<body class="social-profile">
+<body class="glass-theme profile-page">
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
     <header class="glass-nav">
-        <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-        <button onclick="location.href='index.html'" class="glass-btn">Home Feed</button>
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+            <div class="auth-group">
+                <button onclick="location.href='index.html'" class="glass-btn">← Home Feed</button>
+                <button onclick="handleLogout()" class="btn-primary" style="background: #ef4444;">Logout</button>
+            </div>
+        </div>
     </header>
 
-    <main class="social-container">
-        <section class="profile-card glass-panel">
-            <div class="profile-main">
-                <img id="profile-pic" src="" alt="Avatar">
-                <div class="profile-info">
-                    <h2 id="display-nick">@nickname</h2>
+    <main class="content-wrapper">
+        <section class="profile-hero">
+            <div class="profile-card-large glass-panel">
+                <div class="avatar-container">
+                    <img id="profile-pic" src="" alt="Avatar">
+                    <div class="rank-badge">Contributor</div>
+                </div>
+                
+                <div class="profile-details">
+                    <h1 id="display-nick">@nickname</h1>
+                    <p id="display-email" class="email-subtext">user@escuelassj.com</p>
+                    
                     <div class="social-stats">
                         <div class="stat-item">
                             <span id="total-wires" class="stat-num">0</span>
                             <span class="stat-label">Total Wires</span>
                         </div>
+                        <div class="stat-divider"></div>
                         <div class="stat-item">
                             <span id="post-count" class="stat-num">0</span>
                             <span class="stat-label">Articles</span>
@@ -31,19 +50,28 @@
             </div>
         </section>
 
-        <div id="my-articles-grid" class="social-grid"></div>
+        <h3 class="section-title">My Intelligence Reports</h3>
+        <div id="my-articles-grid" class="cube-grid">
+            </div>
     </main>
 
     <script src="script.js"></script>
     <script>
         window.onload = () => {
             const nick = localStorage.getItem("userNick");
+            const email = localStorage.getItem("userEmail");
+            
             if (!nick) return location.href = 'index.html';
 
+            // Настройка профиля
             document.getElementById('display-nick').innerText = `@${nick}`;
-            document.getElementById('profile-pic').src = `https://ui-avatars.com{nick}&background=random&size=150`;
+            document.getElementById('display-email').innerText = email || 'Standard Access';
+            document.getElementById('profile-pic').src = `https://ui-avatars.com/api/?name=${nick}&background=2563eb&color=fff&size=200&bold=true`;
 
-            // Считаем статьи и "Wires"
+            loadMyArticles(nick);
+        };
+
+        function loadMyArticles(nick) {
             const articles = JSON.parse(localStorage.getItem("articles") || "[]");
             const myArticles = articles.filter(a => a.author === nick);
             const totalWires = myArticles.reduce((sum, art) => sum + (art.views || 0), 0);
@@ -52,16 +80,35 @@
             document.getElementById('total-wires').innerText = totalWires;
 
             const grid = document.getElementById('my-articles-grid');
+            
+            if (myArticles.length === 0) {
+                grid.innerHTML = `<p class="empty-msg">You haven't published any reports yet.</p>`;
+                return;
+            }
+
             grid.innerHTML = myArticles.map(art => `
-                <div class="social-square">
-                    <div class="square-data">
-                        <h4>${art.title}</h4>
-                        <div class="square-stats">❤️ ${art.likes || 0} | 👁 ${art.views || 0}</div>
+                <div class="cube-card shadow-premium">
+                    <div class="card-header">
+                        <span class="tag">${art.category}</span>
+                        <button class="delete-btn-icon" onclick="deleteArticle(${art.id})" title="Delete Article">×</button>
                     </div>
-                    <button class="del-btn" onclick="deleteArticle(${art.id})">×</button>
+                    <h3 onclick="location.href='article.html?id=${art.id}'" style="cursor:pointer">${art.title}</h3>
+                    <div class="card-footer">
+                        <span>👁 ${art.views || 0} views</span>
+                        <span>❤️ ${art.likes || 0} likes</span>
+                    </div>
                 </div>
             `).join('');
-        };
+        }
+
+        function deleteArticle(id) {
+            if (confirm("Are you sure you want to delete this intelligence report? This action cannot be undone.")) {
+                let articles = JSON.parse(localStorage.getItem("articles") || "[]");
+                articles = articles.filter(a => a.id !== id);
+                localStorage.setItem("articles", JSON.stringify(articles));
+                location.reload();
+            }
+        }
     </script>
 </body>
 </html>
