@@ -4,88 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://googleapis.com" rel="stylesheet">
-    <title>Professional Editor | School Press</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Intelligence Editor | School Press</title>
 </head>
-<body class="editor-body">
+<body class="glass-theme editor-page">
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-    <!-- Header / Navigation -->
-    <header class="editor-nav">
-        <div class="nav-left">
+    <header class="glass-nav">
+        <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-            <span class="document-status">Drafting Story...</span>
-        </div>
-        <div class="nav-right">
-            <button onclick="location.href='index.html'" class="btn-secondary">Cancel</button>
-            <button onclick="publishArticle()" class="btn-primary">Publish Article</button>
+            <div class="auth-group">
+                <button onclick="location.href='index.html'" class="glass-btn">Discard</button>
+                <button onclick="publishArticle()" class="glass-btn btn-primary">Publish Report</button>
+            </div>
         </div>
     </header>
 
-    <main class="editor-main">
-        <!-- Floating Toolbar like in Word/Medium -->
-        <div class="editor-toolbar glass-panel">
+    <main class="content-wrapper">
+        <div class="editor-toolbar-fixed">
             <div class="tool-group">
-                <select onchange="format('formatBlock', this.value)">
-                    <option value="p">Normal Text</option>
-                    <option value="h1">Heading 1</option>
-                    <option value="h2">Heading 2</option>
-                    <option value="h3">Heading 3</option>
-                </select>
-            </div>
-            <div class="tool-separator"></div>
-            <div class="tool-group">
-                <button onclick="format('bold')" title="Bold"><b>B</b></button>
-                <button onclick="format('italic')" title="Italic"><i>I</i></button>
-                <button onclick="format('underline')" title="Underline"><u>U</u></button>
-                <button onclick="format('strikeThrough')" title="Strike">S̶</button>
-            </div>
-            <div class="tool-separator"></div>
-            <div class="tool-group">
+                <button onclick="format('bold')"><b>B</b></button>
+                <button onclick="format('italic')"><i>I</i></button>
                 <button onclick="format('insertUnorderedList')">• List</button>
-                <button onclick="format('insertOrderedList')">1. List</button>
-                <button onclick="format('justifyLeft')">Left</button>
-                <button onclick="format('justifyCenter')">Center</button>
             </div>
             <div class="tool-separator"></div>
             <div class="tool-group">
-                <button onclick="insertLink()">Link</button>
-                <button onclick="format('removeFormat')">Clear</button>
+                <button onclick="insertImage()">🖼 Image</button>
+                <button onclick="insertLink()">🔗 Link</button>
             </div>
+            <div class="tool-separator"></div>
+            <select id="category-select" class="editor-select">
+                <option value="MATS">MATS</option>
+                <option value="LCyL">LCyL</option>
+                <option value="ING">ING</option>
+                <option value="FyQ">FyQ</option>
+                <option value="PE">PE</option>
+                <option value="BIO">BIO</option>
+            </select>
         </div>
 
-        <!-- Document Area -->
-        <div class="document-page shadow-premium">
-            <input type="text" id="title" class="title-input" placeholder="Enter your title here..." spellcheck="false">
-            <div class="meta-row">
-                <select id="category" class="minimal-select">
-                    <option value="MATS">Mathematics</option>
-                    <option value="INGL">English</option>
-                    <option value="FyQ">Physics & Chemistry</option>
-                    <option value="LcyL">Spanish Literature</option>
-                </select>
-                <input type="text" id="icon" class="minimal-input" placeholder="Add Icon (e.g. 📚)">
-            </div>
-            <hr class="editor-divider">
-            <div id="content" contenteditable="true" class="main-writing-area" data-placeholder="Start your story here..."></div>
+        <div class="editor-paper glass-panel">
+            <input type="text" id="title" class="title-input-large" placeholder="Report Title..." spellcheck="false">
+            <div id="content" contenteditable="true" class="writing-area" data-placeholder="Write your intelligence report here..."></div>
         </div>
     </main>
 
     <script src="script.js"></script>
     <script>
-        // Команды форматирования
-        function format(cmd, value = null) {
-            document.execCommand(cmd, false, value);
-            document.getElementById('content').focus();
+        function format(cmd, val = null) {
+            document.execCommand(cmd, false, val);
+        }
+
+        function insertImage() {
+            const url = prompt("Paste Image URL (or use a placeholder link):");
+            if (url) {
+                format('insertImage', url);
+            }
         }
 
         function insertLink() {
-            const url = prompt("Enter the URL:");
-            if(url) format('createLink', url);
+            const url = prompt("Enter link URL:");
+            if (url) format('createLink', url);
         }
 
-        // Блокировка доступа без логина
-        if (!localStorage.getItem("userEmail")) {
-            alert("Please sign in first!");
+        // Защита: только залогиненные
+        if (!localStorage.getItem("userNick")) {
             location.href = 'index.html';
         }
     </script>
