@@ -1,168 +1,116 @@
-/* --- GLOBAL RESET & BASE --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- GLOBAL RESET --- */
+* { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
 
 :root {
-    --accent: #2563eb;
-    --glass-bg: rgba(255, 255, 255, 0.03);
+    --accent: #2563eb; /* Фирменный синий */
+    --accent-hover: #1d4ed8;
+    --text-main: #ffffff;
+    --text-sub: rgba(255,255,255,0.7);
+    --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 body { 
-    font-family: 'Inter', -apple-system, sans-serif; 
-    color: #ffffff; /* Текст теперь белый */
-    line-height: 1.6;
+    font-family: 'Inter', sans-serif; 
+    color: var(--text-main); 
     background: #0f172a; /* Глубокий темный фон */
+    line-height: 1.6;
     overflow-x: hidden;
     min-height: 100vh;
 }
 
-/* --- LIQUID GLASS BACKGROUND --- */
+/* --- Анимированный стеклянный фон --- */
 .glass-bg-blobs {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: -1; overflow: hidden;
-    pointer-events: none;
+    z-index: -1; overflow: hidden; pointer-events: none;
 }
-.blob { position: absolute; width: 500px; height: 500px; filter: blur(80px); opacity: 0.4; border-radius: 50%; animation: move 20s infinite alternate; }
+.blob { position: absolute; width: 500px; height: 500px; filter: blur(80px); opacity: 0.3; border-radius: 50%; }
 .blob-1 { background: #3b82f6; top: -100px; right: -100px; }
-.blob-2 { background: #1d4ed8; bottom: -100px; left: -100px; animation-delay: -5s; }
+.blob-2 { background: #1d4ed8; bottom: -100px; left: -100px; }
 
-@keyframes move {
-    from { transform: translate(0, 0); }
-    to { transform: translate(50px, 100px); }
+/* --- Контейнер контента --- */
+.content-wrapper {
+    width: 90%; max-width: 935px; /* Размер как в Instagram */
+    margin: 30px auto; padding-bottom: 50px;
 }
 
-/* --- FORTUNE 500 NAVIGATION --- */
+/* --- ШАПКА --- */
 header.glass-nav {
-    display: flex; 
-    justify-content: center; /* Центрируем контейнер */
-    width: 100%;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
+    display: flex; justify-content: center;
+    background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
     position: sticky; top: 0; z-index: 1000;
 }
-
 .nav-container {
-    width: 90%;
-    max-width: 1200px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
+    width: 90%; max-width: 935px; display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;
 }
-
-.main-nav { display: flex; gap: 20px; }
-.nav-link { 
-    color: rgba(255,255,255,0.7); 
-    text-decoration: none; 
-    font-weight: 500;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.nav-link:hover, .nav-link.active { color: var(--accent); }
-
 .logo { font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; cursor: pointer; color: white; }
 .logo span { color: var(--accent); }
-
-/* --- HERO SECTION --- */
-.hero-center { text-align: center; padding: 80px 20px 40px; }
-.liquid-text {
-    font-size: clamp(2.5rem, 8vw, 4.5rem); /* Адаптивный размер текста */
-    font-weight: 900; letter-spacing: -2px;
-    background: linear-gradient(135deg, #ffffff 0%, #3b82f6 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 1rem;
-}
+.auth-group { display: flex; gap: 10px; align-items: center; }
 
 /* --- КНОПКИ --- */
-.glass-btn, button {
-    padding: 10px 22px; border-radius: 12px; 
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg); 
-    color: white;
-    backdrop-filter: blur(10px);
-    font-weight: 600; cursor: pointer; transition: 0.3s;
+.glass-btn {
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--glass-border);
+    background: var(--glass-bg); color: white; font-weight: 600; cursor: pointer; transition: 0.2s;
 }
-button:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+.glass-btn:hover { background: rgba(255,255,255,0.08); }
 .btn-primary { background: var(--accent); border: none; }
+.btn-primary:hover { background: var(--accent-hover); }
 
-/* --- ARTICLE GRID --- */
+/* --- ПРОФИЛЬ (INSTAGRAM-STYLE) --- */
+.profile-card-large {
+    display: grid; grid-template-columns: 1fr 2fr; /* Лево: фото, право: инфо */
+    align-items: center; gap: 60px; padding: 30px 0;
+    border-bottom: 1px solid var(--glass-border); margin-bottom: 30px;
+}
+.avatar-container { display: flex; justify-content: center; position: relative; }
+#profile-pic { width: 150px; height: 150px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); }
+.rank-badge {
+    position: absolute; bottom: -10px; background: var(--accent);
+    padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+}
+
+.profile-details h1 { font-size: 1.8rem; font-weight: 400; color: white; }
+.email-subtext { color: var(--text-sub); font-size: 1rem; margin-bottom: 15px; }
+
+.social-stats { display: flex; gap: 40px; }
+.stat-item { display: flex; gap: 6px; font-size: 1rem; color: white; }
+.stat-num { font-weight: 600; }
+.stat-label { font-weight: 400; color: var(--text-sub); }
+
+/* --- СЕТКА INSTAGRAM (INSTA-GRID) --- */
+.section-title { text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; color: var(--text-sub); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
 .cube-grid {
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px; padding: 40px 5%;
-    max-width: 1300px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); /* 3 колонки, как в Insta */
+    gap: 4px; /* Маленькое расстояние */
 }
 
 .cube-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    border-radius: 20px; padding: 25px;
-    border: 1px solid var(--glass-border);
-    transition: 0.3s ease;
+    background: rgba(255,255,255,0.03); aspect-ratio: 1 / 1; /* Квадратная! */
+    overflow: hidden; cursor: pointer; position: relative;
+    border-radius: 4px; border: 1px solid var(--glass-border); transition: 0.2s;
 }
-.cube-card:hover { 
-    transform: translateY(-10px); 
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.08);
-}
+.cube-card:hover { transform: scale(1.02); filter: brightness(1.2); border-color: var(--accent); }
 
-.tag { 
-    font-size: 0.7rem; font-weight: 800; color: #3b82f6; 
-    background: rgba(59, 130, 246, 0.1); 
-    padding: 4px 10px; border-radius: 50px; margin-bottom: 12px; display: inline-block; 
+/* Оверлей при наведении (как в Insta показывает лайки/просмотры) */
+.insta-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity 0.3s; gap: 20px; font-weight: 600;
 }
-/* Стиль контейнера аватарки */
-.user-avatar-wrapper {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid var(--glass-border);
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--glass-bg);
-}
+.cube-card:hover .insta-overlay { opacity: 1; }
 
-.user-avatar-wrapper:hover {
-    transform: scale(1.1);
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+/* Содержимое квадрата */
+.card-insta-content {
+    display: flex; flex-direction: column; justify-content: space-between;
+    width: 100%; height: 100%; padding: 15px; pointer-events: none;
 }
+.card-header .tag { font-size: 0.65rem; color: #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 3px 8px; border-radius: 50px; font-weight: 800; }
+.card-insta-content h3 { font-size: 1rem; font-weight: 600; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin-top: auto; color: white; }
 
-.user-avatar-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Чтобы фото не сплющивалось */
-}
-/* Ряд для кнопки и аватарки */
-.logged-in-row {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Расстояние между кнопкой и фото */
-}
+.delete-btn-icon { background: none; color: rgba(239, 68, 68, 0.6); border: none; width: 20px; height: 20px; cursor: pointer; font-size: 1.2rem; margin-left: auto; position: absolute; top: 10px; right: 10px; z-index: 10; pointer-events: auto; }
+.delete-btn-icon:hover { color: #ef4444; }
 
-/* Стили навигации для большого количества предметов */
-.main-nav {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap; /* Если предметов много, они перейдут на вторую строку на мобилках */
-    justify-content: center;
-}
-
-.nav-link {
-    font-size: 0.85rem;
-    padding: 5px 10px;
-    opacity: 0.7;
-}
-
-.nav-link.active {
-    opacity: 1;
-    color: var(--accent);
-    font-weight: 700;
-}
+/* Empty state */
+.empty-msg { grid-column: 1/-1; text-align: center; color: var(--text-sub); padding: 40px; font-size: 1.1rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; }
