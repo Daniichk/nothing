@@ -6,11 +6,11 @@ const saveArticles = (articles) => localStorage.setItem("articles", JSON.stringi
 // --- 1. АВТОРИЗАЦИЯ И ДОСТУП ---
 
 function handleAuthClick() {
-    const email = prompt("Corporate Email (@escuelassj.com):");
+    const email = prompt("Corporate Email (@alu.escuelassj.com):");
     if (!email) return;
 
     // Валидация почты (RegEx)
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@escuelassj\.com$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@alu.escuelassj\.com$/;
     if (!emailRegex.test(email.toLowerCase())) {
         alert("ACCESS DENIED: Internal domain @escuelassj.com required.");
         return;
