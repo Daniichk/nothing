@@ -40,11 +40,17 @@ function checkAuth() {
 
     if (nick) {
         if (loginBtn) loginBtn.style.display = "none";
+        
         if (userDisplay) {
-            userDisplay.innerText = `@${nick}`;
             userDisplay.style.display = "flex";
-            userDisplay.onclick = handleLogout;
+            
+            // Генерируем аватарку по нику (или используй прямую ссылку на фото)
+            const avatarUrl = `https://ui-avatars.com/api/?name=${nick}&background=2563eb&color=fff&bold=true`;
+            
+            userDisplay.innerHTML = `<img src="${avatarUrl}" alt="Profile">`;
+            userDisplay.title = `Signed in as @${nick}`; // Подсказка при наведении
         }
+        
         if (writeBtn) writeBtn.style.display = "flex";
     }
 }
