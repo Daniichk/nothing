@@ -1,49 +1,169 @@
-// --- ХРАНИЛИЩЕ ДАННЫХ ---
+// --- КОНФИГУРАЦИЯ ---
+const GROQ_API_KEY = "ВАШ_КЛЮЧ_GROQ"; // Вставь сюда свой API ключ
 const getArticles = () => JSON.parse(localStorage.getItem("articles") || "[]");
 const saveArticles = (articles) => localStorage.setItem("articles", JSON.stringify(articles));
 
-// --- ЛАЙКИ И ПРОСМОТРЫ (WIRES) ---
-function addLike(id) {
-    let articles = getArticles();
-    const index = articles.findIndex(a => a.id === id);
-    if (index !== -1) {
-        if (!articles[index].likes) articles[index].likes = 0;
-        articles[index].likes++;
-        saveArticles(articles);
-        displayArticles(); // Обновить главную
-    }
-}
+// --- 1. АВТОРИЗАЦИЯ И ДОСТУП ---
 
-function addView(id) {
-    let articles = getArticles();
-    const index = articles.findIndex(a => a.id === id);
-    if (index !== -1) {
-        if (!articles[index].views) articles[index].views = 0;
-        articles[index].views++;
-        saveArticles(articles);
-    }
-}
-
-// --- АВТОРИЗАЦИЯ ---
 function handleAuthClick() {
-    const email = prompt("Enter @://escuelassj.com email:");
-    if (!email || !email.endsWith("@://escuelassj.com")) return alert("School domain required!");
-    
-    const nick = prompt("Professional Nickname:");
-    if (!nick || nick.length < 3) return alert("Invalid nickname.");
+    const email = prompt("Corporate Email (@escuelassj.com):");
+    if (!email) return;
 
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userNick", nick);
+    // Валидация почты (RegEx)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@escuelassj\.com$/;
+    if (!emailRegex.test(email.toLowerCase())) {
+        alert("ACCESS DENIED: Internal domain @escuelassj.com required.");
+        return;
+    }
+
+    const nick = prompt("Professional Nickname (min 3 chars):");
+    if (!nick || nick.length < 3) {
+        alert("INVALID NICKNAME: Too short.");
+        return;
+    }
+
+    // Очистка ника от мусора
+    const cleanNick = nick.trim().replace(/[^a-zA-Z0-9_]/g, '');
+
+    localStorage.setItem("userEmail", email.toLowerCase());
+    localStorage.setItem("userNick", cleanNick);
+    
+    alert(`Welcome to the grid, @${cleanNick}`);
     location.reload();
 }
 
 function checkAuth() {
     const nick = localStorage.getItem("userNick");
+    const loginBtn = document.getElementById('login-btn');
+    const userDisplay = document.getElementById('user-display');
+    const writeBtn = document.getElementById('write-btn');
+
     if (nick) {
-        document.getElementById('login-btn').style.display = "none";
-        const display = document.getElementById('user-display');
-        display.innerText = `@${nick}`;
-        display.style.display = "flex";
-        document.getElementById('write-btn').style.display = "flex";
+        if (loginBtn) loginBtn.style.display = "none";
+        if (userDisplay) {
+            userDisplay.innerText = `@${nick}`;
+            userDisplay.style.display = "flex";
+            userDisplay.onclick = handleLogout;
+        }
+        if (writeBtn) writeBtn.style.display = "flex";
     }
 }
+
+function handleLogout() {
+    if (confirm("Terminate current session?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// --- 2. ЛОГИКА СТАТЕЙ (ЛАЙКИ, ПРОСМОТРЫ, КЛИКИ) ---
+
+function handleCardClick(event, id) {
+    // Если кликнули по кнопке лайка - не переходим
+    if (event.target.closest('.like-btn')) {
+        addLike(id);
+        return;
+    }
+    
+    // Засчитываем просмотр и открываем
+    addView(id);
+    window.location.href = `article.html?id=${id}`;
+}
+
+function addLike(id) {
+    let articles = getArticles();
+    const idx = articles.findIndex(a => a.id === id);
+    if (idx !== -1) {
+        articles[idx].likes = (articles[idx].likes || 0) + 1;
+        saveArticles(articles);
+        if (typeof displayArticles === 'function') displayArticles();
+    }
+}
+
+function addView(id) {
+    let articles = getArticles();
+    const idx = articles.findIndex(a => a.id === id);
+    if (idx !== -1) {
+        articles[idx].views = (articles[idx].views || 0) + 1;
+        saveArticles(articles);
+    }
+}
+
+// --- 3. СУПЕР-МОДЕРАЦИЯ (LOCAL + AI) ---
+
+async function moderateArticle(title, content) {
+    // А) Локальная проверка (быстрая)
+    if (title.length < 5 || content.length < 20) {
+        return { isValid: false, reason: "Insufficient data depth (too short)." };
+    }
+    
+    // Б) Проверка через Groq AI
+    try {
+        const promptText = `Analyze article for "School Press" (academic portal). 
+        Title: ${title}. Content: ${content}. 
+        Check for: toxicity, spam, non-academic content. 
+        Respond ONLY JSON: {"isValid": boolean, "reason": "string"}`;
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama3-8b-8192",
+                messages: [{ role: "user", content: promptText }],
+                response_format: { type: "json_object" }
+            })
+        });
+
+        const data = await response.json();
+        return JSON.parse(data.choices[0].message.content);
+    } catch (e) {
+        console.warn("AI offline, passing to manual mode.");
+        return { isValid: true, reason: "Local bypass" };
+    }
+}
+
+// --- 4. ПУБЛИКАЦИЯ (ДЛЯ editor.html) ---
+
+async function publishArticle() {
+    const title = document.getElementById('post-title').value;
+    const content = document.getElementById('post-content').value;
+    const category = document.getElementById('post-category').value;
+    const btn = document.getElementById('publish-btn');
+
+    if (!title || !content) return alert("Fill all fields.");
+
+    btn.disabled = true;
+    btn.innerText = "Neural Scanning...";
+
+    const moderation = await moderateArticle(title, content);
+
+    if (!moderation.isValid) {
+        alert(`PROTOCOL ERROR: ${moderation.reason}`);
+        btn.disabled = false;
+        btn.innerText = "Publish";
+        return;
+    }
+
+    const newArticle = {
+        id: Date.now(),
+        title,
+        content,
+        category,
+        author: localStorage.getItem("userNick") || "Guest",
+        views: 0,
+        likes: 0,
+        date: new Date().toISOString()
+    };
+
+    const articles = getArticles();
+    articles.unshift(newArticle);
+    saveArticles(articles);
+
+    window.location.href = 'index.html';
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ ---
+document.addEventListener('DOMContentLoaded', checkAuth);
