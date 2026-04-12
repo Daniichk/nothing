@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>School Press | Reading</title>
+</head>
+<body class="glass-theme">
+    <div class="glass-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <header class="glass-nav">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+            <button onclick="location.href='index.html'" class="glass-btn">← Back</button>
+        </div>
+    </header>
+
+    <main class="content-wrapper" style="margin-top: 50px;">
+        <article id="full-article" class="cube-card shadow-premium" style="max-width: 800px; margin: 0 auto; cursor: default;">
+            <div id="loader">Loading intelligence...</div>
+        </article>
+    </main>
+
+    <script>
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const articleId = parseInt(params.get('id'));
+            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+            
+            const article = articles.find(a => a.id === articleId);
+            const container = document.getElementById('full-article');
+
+            if (article) {
+                // Обновляем заголовок вкладки
+                document.title = `${article.title} | School Press`;
+                
+                // Рендерим контент
+                container.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <span class="tag">${article.category}</span>
+                        <h1 style="font-size: 2.5rem; margin: 15px 0;">${article.title}</h1>
+                        <div style="opacity: 0.6; font-size: 0.9rem;">
+                            By <b>@${article.author}</b> • ${article.views || 0} views
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+                    <div class="article-body" style="line-height: 1.8; font-size: 1.1rem; color: rgba(255,255,255,0.9);">
+                        ${article.content}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<h1>Article Not Found</h1><p>The requested intelligence report does not exist.</p>`;
+            }
+        };
+    </script>
+</body>
+</html>
