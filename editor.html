@@ -17,7 +17,7 @@
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
             <div class="editor-actions">
-                <span class="save-status">Draft saved</span>
+                <button onclick="toggleGuide()" class="guide-trigger" title="Commands Guide">?</button>
                 <button onclick="location.href='index.html'" class="glass-btn">Exit</button>
                 <button onclick="publishArticle()" class="btn-primary">Publish</button>
             </div>
@@ -25,6 +25,16 @@
     </header>
 
     <main class="editor-layout">
+        <aside id="commands-guide" class="side-guide">
+            <h3>Quick Commands</h3>
+            <div class="guide-item"><kbd>Ctrl</kbd>+<kbd>B</kbd> <span>Bold</span></div>
+            <div class="guide-item"><kbd>Ctrl</kbd>+<kbd>I</kbd> <span>Italic</span></div>
+            <div class="guide-item"><kbd>Ctrl</kbd>+<kbd>U</kbd> <span>Underline</span></div>
+            <div class="guide-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd> <span>Undo</span></div>
+            <hr>
+            <p>Use the toolbar above for images, links, and text coloring.</p>
+        </aside>
+
         <div class="floating-toolbar shadow-premium">
             <div class="t-section">
                 <select onchange="format('fontName', this.value)" class="t-select">
@@ -33,19 +43,9 @@
                     <option value="JetBrains Mono">Mono</option>
                 </select>
                 <div class="t-divider"></div>
-                <button class="t-btn" onclick="format('bold')" title="Bold"><b>B</b></button>
-                <button class="t-btn" onclick="format('italic')" title="Italic"><i>I</i></button>
-                <div class="t-color-box">
-                    <input type="color" onchange="format('foreColor', this.value)" class="t-color-input">
-                </div>
-            </div>
-
-            <div class="t-divider"></div>
-
-            <div class="t-section">
-                <button class="t-btn" onclick="format('justifyLeft')">⫷</button>
-                <button class="t-btn" onclick="format('justifyCenter')">〓</button>
-                <button class="t-btn" onclick="format('insertUnorderedList')">•≡</button>
+                <button class="t-btn" onclick="format('bold')">B</button>
+                <button class="t-btn" onclick="format('italic')">I</button>
+                <input type="color" onchange="format('foreColor', this.value)" class="t-color-dot">
             </div>
 
             <div class="t-divider"></div>
@@ -59,17 +59,21 @@
 
             <div class="t-section">
                 <select id="category-select" class="t-select category-highlight">
+                    <option value="All">All Sectors</option>
                     <option value="MATS">MATS</option>
                     <option value="LCyL">LCyL</option>
                     <option value="ING">ING</option>
                     <option value="FyQ">FyQ</option>
+                    <option value="PE">PE</option>
+                    <option value="BIO">BIO</option>
+                    <option value="VAL">VAL</option>
                 </select>
             </div>
         </div>
 
         <div class="canvas-area">
-            <input type="text" id="title" class="huge-title" placeholder="Untitled Report" autocomplete="off">
-            <div id="content" contenteditable="true" class="pro-writing-area" data-placeholder="Type '/' for commands or start writing..."></div>
+            <input type="text" id="title" class="huge-title" placeholder="Report Title..." autocomplete="off">
+            <div id="content" contenteditable="true" class="pro-writing-area" data-placeholder="Start your intelligence briefing here..."></div>
         </div>
     </main>
 
@@ -80,17 +84,21 @@
             document.getElementById('content').focus();
         }
 
+        function toggleGuide() {
+            const guide = document.getElementById('commands-guide');
+            guide.classList.toggle('active');
+        }
+
         function insertImage() {
-            const url = prompt("Paste Image URL:");
+            const url = prompt("Image URL:");
             if (url) format('insertImage', url);
         }
 
         function insertLink() {
-            const url = prompt("Enter URL:");
+            const url = prompt("Link URL:");
             if (url) format('createLink', url);
         }
 
-        // Авто-фокус на заголовок при входе
         window.onload = () => document.getElementById('title').focus();
     </script>
 </body>
