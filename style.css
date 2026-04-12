@@ -148,3 +148,58 @@ header.glass-nav {
     text-align: center;
     margin-bottom: 40px;
 }
+/* Контейнер для фильтров предметов */
+.subject-filter {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px auto 40px;
+    flex-wrap: wrap;
+    max-width: 800px;
+}
+
+/* Стили кнопок-предметов (Пилюли) */
+.nav-link {
+    padding: 8px 16px;
+    border-radius: 20px; /* Делаем овальными */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(5px);
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Активная кнопка (выбранный предмет) */
+.nav-link.active {
+    background: #2563eb; /* Твой синий акцент */
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Кнопка Publish (справа в шапке) */
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+}
