@@ -203,3 +203,65 @@ header.glass-nav {
     background: #1d4ed8;
     transform: scale(1.05);
 }
+.editor-page .content-wrapper {
+    max-width: 800px;
+}
+
+.editor-toolbar-fixed {
+    display: flex;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 80px;
+    z-index: 100;
+    margin-bottom: 20px;
+}
+
+.editor-paper {
+    min-height: 600px;
+    padding: 60px;
+    border-radius: 4px; /* Как лист бумаги */
+}
+
+.title-input-large {
+    width: 100%;
+    background: none;
+    border: none;
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 30px;
+    outline: none;
+}
+
+.writing-area {
+    min-height: 400px;
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.9);
+    outline: none;
+    line-height: 1.8;
+}
+
+.writing-area img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.editor-select {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+/* Скрываем плейсхолдер если есть текст */
+.writing-area:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(255,255,255,0.3);
+}
