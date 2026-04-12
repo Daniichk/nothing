@@ -265,3 +265,58 @@ header.glass-nav {
     content: attr(data-placeholder);
     color: rgba(255,255,255,0.3);
 }
+/* Контейнер навигации — самое важное */
+.nav-container {
+    width: 90%;
+    max-width: 935px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* Лого слева, кнопки справа */
+    align-items: center;
+    padding: 15px 0;
+}
+
+/* Группа кнопок справа */
+.auth-group {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между кнопками */
+}
+
+/* Общий стиль кнопок в шапке */
+.glass-btn, .btn-primary {
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Publish Report — яркая */
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+
+/* Discard — прозрачная */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
