@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>School Press | Reading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Intelligence Report | School Press</title>
 </head>
-<body class="glass-theme">
+<body class="glass-theme article-page">
     <div class="glass-bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -15,47 +16,73 @@
     <header class="glass-nav">
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-            <button onclick="location.href='index.html'" class="glass-btn">← Back</button>
+            <div class="auth-group">
+                <button onclick="location.href='index.html'" class="glass-btn">Back to Feed</button>
+            </div>
         </div>
     </header>
 
-    <main class="content-wrapper" style="margin-top: 50px;">
-        <article id="full-article" class="cube-card shadow-premium" style="max-width: 800px; margin: 0 auto; cursor: default;">
-            <div id="loader">Loading intelligence...</div>
+    <main class="content-wrapper article-view">
+        <article class="reading-container">
+            <header class="article-header">
+                <span id="art-category" class="tag-large">CATEGORY</span>
+                <h1 id="art-title" class="entry-title">Loading Intelligence Report...</h1>
+                
+                <div class="author-card">
+                    <div id="art-avatar" class="mini-avatar"></div>
+                    <div class="author-meta">
+                        <span id="art-author" class="author-name">@username</span>
+                        <span id="art-date" class="publish-date">April 12, 2026</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="art-content" class="article-body lora-font">
+                </div>
+
+            <footer class="article-footer">
+                <div class="interaction-bar">
+                    <button class="action-btn" onclick="handleLike()">❤️ <span id="art-likes">0</span></button>
+                    <button class="action-btn">👁 <span id="art-views">0</span></button>
+                </div>
+            </footer>
         </article>
     </main>
 
+    <script src="script.js"></script>
     <script>
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
-            const articleId = parseInt(params.get('id'));
-            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
-            
-            const article = articles.find(a => a.id === articleId);
-            const container = document.getElementById('full-article');
+            const id = params.get('id');
+            if (!id) return location.href = 'index.html';
 
-            if (article) {
-                // Обновляем заголовок вкладки
-                document.title = `${article.title} | School Press`;
+            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+            const art = articles.find(a => a.id == id);
+
+            if (art) {
+                // Увеличиваем просмотры
+                art.views = (art.views || 0) + 1;
+                localStorage.setItem("articles", JSON.stringify(articles));
+
+                // Заполняем данные
+                document.getElementById('art-title').innerText = art.title;
+                document.getElementById('art-category').innerText = art.category;
+                document.getElementById('art-author').innerText = `@${art.author}`;
+                document.getElementById('art-date').innerText = art.date || "Today";
+                document.getElementById('art-content').innerHTML = art.content;
+                document.getElementById('art-likes').innerText = art.likes || 0;
+                document.getElementById('art-views').innerText = art.views;
                 
-                // Рендерим контент
-                container.innerHTML = `
-                    <div style="margin-bottom: 20px;">
-                        <span class="tag">${article.category}</span>
-                        <h1 style="font-size: 2.5rem; margin: 15px 0;">${article.title}</h1>
-                        <div style="opacity: 0.6; font-size: 0.9rem;">
-                            By <b>@${article.author}</b> • ${article.views || 0} views
-                        </div>
-                    </div>
-                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-                    <div class="article-body" style="line-height: 1.8; font-size: 1.1rem; color: rgba(255,255,255,0.9);">
-                        ${article.content}
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `<h1>Article Not Found</h1><p>The requested intelligence report does not exist.</p>`;
+                // Аватарка автора
+                document.getElementById('art-avatar').innerHTML = 
+                    `<img src="https://ui-avatars.com/api/?name=${art.author}&background=2563eb&color=fff&bold=true" alt="">`;
             }
         };
+
+        function handleLike() {
+            // Логика лайка (можно добавить в script.js)
+            alert("Thanks for the feedback!");
+        }
     </script>
 </body>
 </html>
