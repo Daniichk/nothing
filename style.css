@@ -527,3 +527,74 @@ header.glass-nav {
     content: attr(data-placeholder);
     color: rgba(255,255,255,0.2);
 }
+/* Читабельность текста */
+.pro-writing-area {
+    color: #ffffff; /* Чистый белый для контраста */
+    font-size: 1.25rem;
+    line-height: 1.8;
+    letter-spacing: -0.01em;
+    text-rendering: optimizeLegibility;
+}
+
+.huge-title {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 4rem;
+    letter-spacing: -3px;
+    opacity: 1; /* Убираем тусклость */
+}
+
+/* Справочник (Sidebar) */
+.side-guide {
+    position: fixed;
+    right: -300px;
+    top: 100px;
+    width: 260px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px 0 0 20px;
+    padding: 25px;
+    transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    z-index: 999;
+}
+
+.side-guide.active {
+    right: 0;
+}
+
+.guide-trigger {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.guide-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+}
+
+kbd {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: var(--accent);
+}
+
+/* Категории (как на скрине) */
+.category-highlight {
+    background: rgba(37, 99, 235, 0.2);
+    color: white !important;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+}
