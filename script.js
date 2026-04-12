@@ -127,42 +127,32 @@ async function moderateArticle(title, content) {
 
 // --- 4. ПУБЛИКАЦИЯ (ДЛЯ editor.html) ---
 
-async function publishArticle() {
-    const title = document.getElementById('post-title').value;
-    const content = document.getElementById('post-content').value;
-    const category = document.getElementById('post-category').value;
-    const btn = document.getElementById('publish-btn');
+function publishArticle() {
+    const titleVal = document.getElementById('title').value;
+    const contentVal = document.getElementById('content').innerHTML;
+    // ВАЖНО: Проверь, чтобы в HTML был id="category-select"
+    const categoryVal = document.getElementById('category-select').value; 
 
-    if (!title || !content) return alert("Fill all fields.");
-
-    btn.disabled = true;
-    btn.innerText = "Neural Scanning...";
-
-    const moderation = await moderateArticle(title, content);
-
-    if (!moderation.isValid) {
-        alert(`PROTOCOL ERROR: ${moderation.reason}`);
-        btn.disabled = false;
-        btn.innerText = "Publish";
+    if (!titleVal || titleVal.trim() === "") {
+        alert("Enter title!");
         return;
     }
 
-    const newArticle = {
+    const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+    const newArt = {
         id: Date.now(),
-        title,
-        content,
-        category,
-        author: localStorage.getItem("userNick") || "Guest",
+        title: titleVal,
+        content: contentVal,
+        category: categoryVal,
+        author: localStorage.getItem("userNick"),
+        date: new Date().toLocaleDateString(),
         views: 0,
-        likes: 0,
-        date: new Date().toISOString()
+        likes: 0
     };
 
-    const articles = getArticles();
-    articles.unshift(newArticle);
-    saveArticles(articles);
-
-    window.location.href = 'index.html';
+    articles.unshift(newArt);
+    localStorage.setItem("articles", JSON.stringify(articles));
+    location.href = 'index.html';
 }
 // Список привилегированных почт
 const ADMINS = ['daniil.derzhakov@alu.escuelassj.com'];
