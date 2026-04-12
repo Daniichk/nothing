@@ -4,68 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://googleapis.com" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <title>School Press | Corporate Intelligence</title>
 </head>
 <body class="glass-theme">
     <div class="glass-bg-blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
     <header class="glass-nav">
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
+            
             <nav class="main-nav">
-                <a href="#" onclick="displayArticles('All')">Insights</a>
-                <a href="#" onclick="displayArticles('MATS')">Analysis</a>
-                <a href="#" onclick="displayArticles('FyQ')">Laboratory</a>
+                <button class="nav-link active" onclick="filterBy('All', this)">Insights</button>
+                <button class="nav-link" onclick="filterBy('MATS', this)">Analysis</button>
+                <button class="nav-link" onclick="filterBy('FyQ', this)">Laboratory</button>
             </nav>
+
             <div class="auth-group">
                 <button onclick="handleAuthClick()" id="login-btn" class="glass-btn">Access Portal</button>
-                <div id="user-display" class="user-pill" onclick="location.href='profile.html'" style="display:none;"></div>
-                <button id="write-btn" class="btn-primary" onclick="location.href='editor.html'" style="display:none;">Publish</button>
+                <div id="user-display" class="user-pill" style="display:none;"></div>
+                <button id="write-btn" class="btn-primary" onclick="location.href='editor.html'" style="display:none;">
+                    <span>+</span> Publish
+                </button>
             </div>
         </div>
     </header>
 
     <main class="content-wrapper">
         <section class="hero-center">
-            <h1 class="liquid-text">I will read here.</h1>
-            <p>High-fidelity academic repository for Escuelas SJ.</p>
+            <div class="badge">Internal Network v3.0</div>
+            <h1 class="liquid-text">Academic Intelligence</h1>
+            <p>High-fidelity repository for Escuelas SJ students and researchers.</p>
         </section>
 
-        <div id="articles-grid" class="cube-grid"></div>
+        <div id="articles-grid" class="cube-grid">
+            <div class="loader-placeholder">Initialising neural link...</div>
+        </div>
     </main>
 
     <script src="script.js"></script>
+    
     <script>
-        window.onload = () => {
-            checkAuth();
-            displayArticles();
-        };
+        // Глобальная переменная для фильтрации
+        let currentFilter = 'All';
 
+        // Функция инициализации при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            displayArticles(); // Показываем статьи
+        });
+
+        // Функция фильтрации с визуальным переключением кнопок
+        function filterBy(category, element) {
+            currentFilter = category;
+            
+            // Убираем класс active у всех ссылок
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            // Добавляем текущей
+            element.classList.add('active');
+            
+            displayArticles(category);
+        }
+
+        // Рендеринг карточек
         function displayArticles(filter = 'All') {
             const grid = document.getElementById('articles-grid');
-            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+            const articles = getArticles(); // Берем из script.js
+            
             const filtered = filter === 'All' ? articles : articles.filter(a => a.category === filter);
 
-            grid.innerHTML = filtered.map(art => `
-                <div class="cube-card shadow-premium" onclick="addView(${art.id}); location.href='article.html?id=${art.id}'">
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No intelligence reports found.</h3>
+                        <p>Be the first to contribute to this sector.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((art, index) => `
+                <div class="cube-card" 
+                     onclick="handleCardClick(event, ${art.id})" 
+                     style="animation: fadeInUp 0.5s ease forwards ${index * 0.1}s; opacity: 0;">
+                    
                     <div class="card-header">
                         <span class="tag">${art.category}</span>
-                        <span class="views-count">👁 ${art.views || 0} wires</span>
+                        <span class="views">👁 ${art.views || 0} wires</span>
                     </div>
-                    <h3>${art.title}</h3>
-                    <p>${art.content.substring(0, 80).replace(/<[^>]*>/g, '')}...</p>
+
+                    <div class="card-body">
+                        <h3>${art.title}</h3>
+                        <p>${stripHTML(art.content).substring(0, 90)}...</p>
+                    </div>
+
                     <div class="card-footer">
                         <span class="author">@${art.author}</span>
-                        <button class="like-btn" onclick="event.stopPropagation(); addLike(${art.id})">
-                            ❤️ ${art.likes || 0}
+                        <button class="like-btn" onclick="addLike(${art.id})">
+                            <span class="heart">❤</span> ${art.likes || 0}
                         </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Утилита для очистки текста от тегов для превью
+        function stripHTML(html) {
+            let doc = new DOMParser().parseFromString(html, 'text/html');
+            return doc.body.textContent || "";
         }
     </script>
 </body>
