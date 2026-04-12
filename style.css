@@ -598,3 +598,28 @@ kbd {
     border-radius: 8px;
     font-weight: 700;
 }
+/* Стиль для "зажатой" кнопки */
+.t-btn.active, .t-pill.active {
+    background: var(--accent); /* Твой синий цвет */
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+}
+
+/* Исправляем читабельность выпадающих списков (image_4099a5) */
+.t-select option {
+    background: #1e293b; /* Темный фон для выпадающего списка */
+    color: white;
+    padding: 10px;
+}
+
+.t-select:focus {
+    outline: 2px solid var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Улучшаем читабельность самого текста в редакторе */
+.pro-writing-area {
+    color: #e2e8f0; /* Светло-серый, приятный для глаз */
+    caret-color: var(--accent); /* Цвет курсора */
+}
