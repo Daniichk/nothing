@@ -1,27 +1,25 @@
-/* --- 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И ПЕРЕМЕННЫЕ --- */
+/* --- 1. ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ --- */
 :root {
     --accent: #2563eb;
     --accent-hover: #1d4ed8;
-    --bg-dark: #0f172a;
-    --bg-glass: rgba(15, 23, 42, 0.8);
     --text-main: #ffffff;
     --text-sub: rgba(255, 255, 255, 0.7);
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-element: rgba(255, 255, 255, 0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
 
-body {
-    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-    color: var(--text-main);
-    background: var(--bg-dark);
+body { 
+    font-family: 'Inter', sans-serif; 
+    color: var(--text-main); 
+    background: var(--bg-dark); 
     line-height: 1.6;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
-/* --- 2. ФОНОВЫЕ ЭФФЕКТЫ --- */
+/* --- 2. ФОНОВЫЕ БЛОБЫ --- */
 .glass-bg-blobs {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     z-index: -1; overflow: hidden; pointer-events: none;
@@ -30,9 +28,9 @@ body {
 .blob-1 { background: var(--accent); top: -100px; right: -100px; }
 .blob-2 { background: #1d4ed8; bottom: -100px; left: -100px; }
 
-/* --- 3. НАВИГАЦИЯ (ШАПКА) --- */
+/* --- 3. ШАПКА (STREAKY NAV) --- */
 header.glass-nav {
-    background: var(--bg-glass);
+    background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
     position: sticky; top: 0; z-index: 1000;
@@ -42,157 +40,104 @@ header.glass-nav {
     width: 90%; max-width: 935px;
     margin: 0 auto;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 15px 0;
+    padding: 12px 0;
 }
 
-.logo { font-weight: 800; font-size: 1.4rem; cursor: pointer; text-decoration: none; color: white; }
+.logo { font-weight: 800; font-size: 1.4rem; color: white; text-decoration: none; }
 .logo span { color: var(--accent); }
 
 .auth-group { display: flex; align-items: center; gap: 15px; }
 
 /* --- 4. КНОПКИ --- */
-.glass-btn, .btn-primary, .t-pill {
-    padding: 8px 18px; border-radius: 10px;
-    font-weight: 600; cursor: pointer; transition: 0.3s;
-    border: 1px solid var(--glass-border);
+.glass-btn, .btn-primary {
+    padding: 8px 20px; border-radius: 10px; font-weight: 600;
+    cursor: pointer; transition: 0.2s; border: 1px solid var(--glass-border);
     text-decoration: none; display: inline-flex; align-items: center;
 }
-
-.glass-btn { background: var(--glass-element); color: white; }
-.glass-btn:hover { background: rgba(255,255,255,0.1); }
+.glass-btn { background: var(--glass-bg); color: white; }
+.glass-btn:hover { background: rgba(255, 255, 255, 0.1); }
 
 .btn-primary { 
     background: var(--accent); color: white; border: none;
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
 }
-.btn-primary:hover { 
-    background: var(--accent-hover); 
-    transform: translateY(-2px); 
-}
+.btn-primary:hover { transform: translateY(-2px); background: var(--accent-hover); }
 
-/* --- 5. ФИЛЬТРЫ ПРЕДМЕТОВ (ГЛАВНАЯ) --- */
+/* --- 5. ФИЛЬТРЫ (ТАБЫ) --- */
 .subject-filter {
     display: flex; justify-content: center; gap: 10px;
-    margin: 30px auto; flex-wrap: wrap; max-width: 800px;
+    margin: 30px 0; flex-wrap: wrap;
 }
-
 .nav-link {
-    padding: 8px 16px; border-radius: 20px;
-    background: var(--glass-element);
-    border: 1px solid var(--glass-border);
-    color: var(--text-sub); font-size: 0.85rem; font-weight: 600;
-    cursor: pointer; transition: 0.3s;
+    padding: 8px 18px; border-radius: 20px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    color: var(--text-sub); font-size: 0.85rem; font-weight: 600; cursor: pointer;
 }
+.nav-link.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-.nav-link:hover, .nav-link.active {
-    background: var(--accent); color: white; border-color: var(--accent);
+/* --- 6. КАРТОЧКИ (INSTA-GRID) --- */
+.content-wrapper { width: 90%; max-width: 935px; margin: 30px auto; }
+
+.cube-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
 }
+.cube-card {
+    background: var(--glass-bg); aspect-ratio: 1 / 1;
+    border-radius: 12px; border: 1px solid var(--glass-border);
+    position: relative; overflow: hidden; cursor: pointer; transition: 0.3s;
+}
+.cube-card:hover { transform: translateY(-5px); border-color: var(--accent); }
 
-/* --- 6. РЕДАКТОР (EDITOR) --- */
+.card-insta-content {
+    height: 100%; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.tag { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+.cube-card h3 { font-size: 1.1rem; color: white; }
+
+/* --- 7. ПРОФИЛЬ --- */
+.profile-card-large {
+    display: flex; align-items: center; gap: 40px;
+    padding: 40px 0; border-bottom: 1px solid var(--glass-border); margin-bottom: 30px;
+}
+#profile-pic { width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--accent); }
+.social-stats { display: flex; gap: 30px; margin-top: 15px; }
+.stat-item { color: white; }
+.stat-num { font-weight: 800; }
+
+/* --- 8. РЕДАКТОР (ФИКС БЕЛОГО ЭКРАНА) --- */
+/* Если на странице editor.html всё белое, это значит, что стили не применяются к новым классам */
+
 .editor-layout {
     display: flex; flex-direction: column; align-items: center;
-    padding: 20px; margin-top: 40px;
+    max-width: 800px; margin: 40px auto;
 }
 
+/* Тулбар редактора */
 .floating-toolbar {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(20px);
-    padding: 10px 16px; border-radius: 16px;
-    border: 1px solid var(--glass-border);
-    position: sticky; top: 80px; z-index: 100;
-    margin-bottom: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    display: flex; gap: 10px; background: rgba(15, 23, 42, 0.9);
+    padding: 10px 20px; border-radius: 12px; border: 1px solid var(--glass-border);
+    position: sticky; top: 80px; z-index: 100; backdrop-filter: blur(10px);
 }
 
-/* Стили кнопок инструментов */
 .t-btn {
-    width: 34px; height: 34px;
-    background: transparent; border: none;
-    color: white; border-radius: 8px;
-    cursor: pointer; transition: 0.2s;
-    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: none; color: white;
+    width: 35px; height: 35px; border-radius: 6px; cursor: pointer;
 }
-.t-btn:hover { background: var(--glass-element); }
+.t-btn:hover { background: var(--glass-bg); }
+.t-btn.active { background: var(--accent); }
 
-/* Состояние "зажатой" кнопки */
-.t-btn.active, .t-pill.active {
-    background: var(--accent) !important;
-    color: white !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+/* Само поле ввода */
+.pro-writing-area {
+    width: 100%; min-height: 500px; background: transparent;
+    color: white; font-size: 1.2rem; outline: none; padding: 20px 0;
 }
-
-/* Исправление читабельности селекторов (image_4099a5) */
-.t-select {
-    background: transparent; border: none;
-    color: white; font-weight: 600; cursor: pointer;
-    padding: 5px;
-}
-.t-select option {
-    background: #1e293b; color: white;
-}
-
-/* Область контента */
-.canvas-area { width: 100%; max-width: 800px; }
-
 .huge-title {
     width: 100%; background: transparent; border: none;
-    font-size: 3.5rem; font-weight: 800; color: white;
-    margin-bottom: 20px; outline: none; letter-spacing: -2px;
+    font-size: 3.5rem; font-weight: 800; color: white; outline: none;
 }
 
-.pro-writing-area {
-    min-height: 500px; font-size: 1.25rem; line-height: 1.8;
-    color: #e2e8f0; outline: none;
-    caret-color: var(--accent);
+/* Исправляем селекторы (шрифты) */
+select.t-select {
+    background: #1e293b; color: white; border: 1px solid var(--glass-border);
+    padding: 5px; border-radius: 5px;
 }
-.pro-writing-area:empty:before {
-    content: attr(data-placeholder);
-    color: rgba(255,255,255,0.2);
-}
-
-/* --- 7. КАРТОЧКИ (INSTA-GRID) --- */
-.cube-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-}
-
-.cube-card {
-    background: var(--glass-element); aspect-ratio: 1 / 1;
-    overflow: hidden; cursor: pointer; position: relative;
-    border-radius: 8px; border: 1px solid var(--glass-border);
-    transition: 0.3s;
-}
-.cube-card:hover { transform: scale(1.02); border-color: var(--accent); }
-
-.insta-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex; justify-content: center; align-items: center;
-    opacity: 0; transition: 0.3s; gap: 15px;
-}
-.cube-card:hover .insta-overlay { opacity: 1; }
-
-/* --- 8. ПРОФИЛЬ --- */
-.profile-card-large {
-    display: grid; grid-template-columns: 150px 1fr;
-    gap: 40px; padding: 40px 0;
-    border-bottom: 1px solid var(--glass-border);
-    align-items: center;
-}
-#profile-pic { 
-    width: 150px; height: 150px; 
-    border-radius: 50%; object-fit: cover;
-    border: 2px solid var(--accent);
-}
-
-/* --- 9. СПРАВОЧНИК --- */
-.side-guide {
-    position: fixed; right: -300px; top: 120px;
-    width: 260px; background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px 0 0 20px; padding: 25px;
-    transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    z-index: 999;
-}
-.side-guide.active { right: 0; }
