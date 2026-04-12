@@ -35,23 +35,17 @@ function handleAuthClick() {
 function checkAuth() {
     const nick = localStorage.getItem("userNick");
     const loginBtn = document.getElementById('login-btn');
+    const userControls = document.getElementById('user-controls'); // Наш новый контейнер
     const userDisplay = document.getElementById('user-display');
-    const writeBtn = document.getElementById('write-btn');
 
     if (nick) {
         if (loginBtn) loginBtn.style.display = "none";
+        if (userControls) userControls.style.display = "flex"; // Показываем сразу кнопку и аватар
         
         if (userDisplay) {
-            userDisplay.style.display = "flex";
-            
-            // Генерируем аватарку по нику (или используй прямую ссылку на фото)
             const avatarUrl = `https://ui-avatars.com/api/?name=${nick}&background=2563eb&color=fff&bold=true`;
-            
             userDisplay.innerHTML = `<img src="${avatarUrl}" alt="Profile">`;
-            userDisplay.title = `Signed in as @${nick}`; // Подсказка при наведении
         }
-        
-        if (writeBtn) writeBtn.style.display = "flex";
     }
 }
 
