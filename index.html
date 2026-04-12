@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <title>School Press | Corporate Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>School Press | Feed</title>
 </head>
 <body class="glass-theme">
     <div class="glass-bg-blobs">
@@ -17,36 +17,34 @@
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
             
-            <nav class="main-nav">
-                <button class="nav-link active" onclick="filterBy('All', this)">All</button>
-                <button class="nav-link" onclick="filterBy('MATS', this)">MATS</button>
-                <button class="nav-link" onclick="filterBy('LCyL', this)">LCyL</button>
-                <button class="nav-link" onclick="filterBy('ING', this)">ING</button>
-                <button class="nav-link" onclick="filterBy('FyQ', this)">FyQ</button>
-                <button class="nav-link" onclick="filterBy('PE', this)">PE</button>
-                <button class="nav-link" onclick="filterBy('BIO', this)">BIO</button>
-            </nav>
-
             <div class="auth-group">
                 <button onclick="handleAuthClick()" id="login-btn" class="glass-btn">Access Portal</button>
                 
                 <div id="user-controls" class="logged-in-row" style="display:none;">
-                    <button id="write-btn" class="btn-primary" onclick="location.href='editor.html'">Publish</button>
-                    <div id="user-display" class="user-avatar-wrapper" onclick="location.href='profile.html'">
-                        </div>
+                    <button class="glass-btn btn-primary" onclick="location.href='editor.html'">Publish</button>
+                    <div id="user-display" class="user-avatar-wrapper" onclick="location.href='profile.html'"></div>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="content-wrapper">
+        <nav class="subject-filter">
+            <button class="nav-link active" onclick="filterBy('All', this)">All</button>
+            <button class="nav-link" onclick="filterBy('MATS', this)">MATS</button>
+            <button class="nav-link" onclick="filterBy('LCyL', this)">LCyL</button>
+            <button class="nav-link" onclick="filterBy('ING', this)">ING</button>
+            <button class="nav-link" onclick="filterBy('FyQ', this)">FyQ</button>
+            <button class="nav-link" onclick="filterBy('PE', this)">PE</button>
+            <button class="nav-link" onclick="filterBy('BIO', this)">BIO</button>
+        </nav>
+
         <section class="hero-center">
-            <h1 class="liquid-text">Academic Intelligence</h1>
-            <p>High-fidelity repository for Escuelas SJ.</p>
+            <h1 class="liquid-text">Academic Feed</h1>
         </section>
 
         <div id="articles-grid" class="cube-grid">
-            <div class="loader-placeholder">Connecting to neural link...</div>
+            <div class="loader-placeholder">Connecting to intelligence network...</div>
         </div>
     </main>
 
@@ -54,7 +52,6 @@
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             displayArticles();
-            // Вызываем проверку авторизации из script.js
             if (typeof checkAuth === 'function') checkAuth(); 
         });
 
@@ -66,26 +63,26 @@
 
         function displayArticles(filter = 'All') {
             const grid = document.getElementById('articles-grid');
-            if (typeof getArticles !== 'function') return;
+            const articles = JSON.parse(localStorage.getItem("articles") || "[]");
             
-            const articles = getArticles();
             const filtered = filter === 'All' ? articles : articles.filter(a => a.category === filter);
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="empty-state"><p>No reports in ${filter} yet.</p></div>`;
+                grid.innerHTML = `<div class="empty-msg">No reports in ${filter} yet.</div>`;
                 return;
             }
 
             grid.innerHTML = filtered.map(art => `
-                <div class="cube-card" onclick="handleCardClick(event, ${art.id})">
-                    <div class="card-header">
-                        <span class="tag">${art.category}</span>
-                        <span class="views">👁 ${art.views || 0}</span>
+                <div class="cube-card shadow-premium" onclick="location.href='article.html?id=${art.id}'">
+                    <div class="card-insta-content">
+                        <div class="card-header">
+                            <span class="tag">${art.category}</span>
+                        </div>
+                        <h3>${art.title}</h3>
                     </div>
-                    <h3>${art.title}</h3>
-                    <div class="card-footer">
-                        <span class="author">@${art.author}</span>
-                        <button class="like-btn" onclick="addLike(${art.id})">❤️ ${art.likes || 0}</button>
+                    <div class="insta-overlay">
+                        <span>👁 ${art.views || 0}</span>
+                        <span>❤️ ${art.likes || 0}</span>
                     </div>
                 </div>
             `).join('');
