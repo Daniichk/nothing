@@ -1,5 +1,5 @@
 // --- КОНФИГУРАЦИЯ ---
-const GROQ_API_KEY = "ВАШ_КЛЮЧ_GROQ"; // Вставь сюда свой API ключ
+const GROQ_API_KEY = "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"; // Вставь сюда свой API ключ
 const getArticles = () => JSON.parse(localStorage.getItem("articles") || "[]");
 const saveArticles = (articles) => localStorage.setItem("articles", JSON.stringify(articles));
 
