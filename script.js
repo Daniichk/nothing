@@ -164,6 +164,35 @@ async function publishArticle() {
 
     window.location.href = 'index.html';
 }
+// Список привилегированных почт
+const ADMINS = ['daniil.derzhakov@alu.escuelassj.com'];
+const MODERATORS = ['daniil.derzhakov@alu.escuelassj.com'];
+
+function getUserRole() {
+    const email = localStorage.getItem("userEmail");
+    if (ADMINS.includes(email)) return 'ADMIN';
+    if (MODERATORS.includes(email)) return 'MODERATOR';
+    return 'USER';
+}
+
+// Улучшенная функция удаления (вызывай её в профиле или на главной)
+function deleteArticle(id) {
+    const articles = JSON.parse(localStorage.getItem("articles") || "[]");
+    const article = articles.find(a => a.id === id);
+    const currentUser = localStorage.getItem("userNick");
+    const role = getUserRole();
+
+    // Проверка прав: автор ИЛИ админ ИЛИ модератор
+    if (article.author === currentUser || role === 'ADMIN' || role === 'MODERATOR') {
+        if (confirm(`Action authorized for ${role}. Delete this report?`)) {
+            const updated = articles.filter(a => a.id !== id);
+            localStorage.setItem("articles", JSON.stringify(updated));
+            location.reload();
+        }
+    } else {
+        alert("Access Denied: You don't have permission to delete this report.");
+    }
+}
 
 // --- ИНИЦИАЛИЗАЦИЯ ---
 document.addEventListener('DOMContentLoaded', checkAuth);
