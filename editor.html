@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <title>Pro Editor | School Press</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Lora:ital,wght@0,400;1,400&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>Intelligence Studio</title>
 </head>
 <body class="glass-theme editor-page">
     <div class="glass-bg-blobs">
@@ -16,57 +16,49 @@
     <header class="glass-nav">
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
-            <div class="auth-group">
-                <button onclick="location.href='index.html'" class="glass-btn">Exit Studio</button>
-                <button onclick="publishArticle()" class="btn-primary">Finalize & Publish</button>
+            <div class="editor-actions">
+                <span class="save-status">Draft saved</span>
+                <button onclick="location.href='index.html'" class="glass-btn">Exit</button>
+                <button onclick="publishArticle()" class="btn-primary">Publish</button>
             </div>
         </div>
     </header>
 
-    <main class="editor-workspace">
-        <div class="pro-toolbar shadow-premium">
-            <div class="tool-section">
-                <select onchange="format('fontName', this.value)" class="tool-select font-family">
-                    <option value="Plus Jakarta Sans">Sans Serif</option>
-                    <option value="serif">Serif</option>
-                    <option value="JetBrains Mono">Monospace</option>
-                    <option value="Comic Sans MS">Dyslexic Friendly</option>
+    <main class="editor-layout">
+        <div class="floating-toolbar shadow-premium">
+            <div class="t-section">
+                <select onchange="format('fontName', this.value)" class="t-select">
+                    <option value="Plus Jakarta Sans">Sans</option>
+                    <option value="Lora">Serif</option>
+                    <option value="JetBrains Mono">Mono</option>
                 </select>
-                <select onchange="format('fontSize', this.value)" class="tool-select font-size">
-                    <option value="3">Normal</option>
-                    <option value="1">Small</option>
-                    <option value="5">Large</option>
-                    <option value="7">Huge</option>
-                </select>
-            </div>
-
-            <div class="tool-divider"></div>
-
-            <div class="tool-section">
+                <div class="t-divider"></div>
                 <button class="t-btn" onclick="format('bold')" title="Bold"><b>B</b></button>
                 <button class="t-btn" onclick="format('italic')" title="Italic"><i>I</i></button>
-                <button class="t-btn" onclick="format('underline')" title="Underline"><u>U</u></button>
-                <input type="color" onchange="format('foreColor', this.value)" title="Text Color" class="color-picker">
+                <div class="t-color-box">
+                    <input type="color" onchange="format('foreColor', this.value)" class="t-color-input">
+                </div>
             </div>
 
-            <div class="tool-divider"></div>
+            <div class="t-divider"></div>
 
-            <div class="tool-section">
-                <button class="t-btn" onclick="format('justifyLeft')">align_left</button>
-                <button class="t-btn" onclick="format('justifyCenter')">align_center</button>
-                <button class="t-btn" onclick="format('insertUnorderedList')">list_bullet</button>
+            <div class="t-section">
+                <button class="t-btn" onclick="format('justifyLeft')">⫷</button>
+                <button class="t-btn" onclick="format('justifyCenter')">〓</button>
+                <button class="t-btn" onclick="format('insertUnorderedList')">•≡</button>
             </div>
 
-            <div class="tool-divider"></div>
+            <div class="t-divider"></div>
 
-            <div class="tool-section">
-                <button class="t-btn action" onclick="insertImage()">🖼 Image</button>
-                <button class="t-btn action" onclick="insertLink()">🔗 Link</button>
-                <button class="t-btn action" onclick="format('removeFormat')">🧹 Reset</button>
+            <div class="t-section">
+                <button class="t-pill" onclick="insertImage()">🖼 Image</button>
+                <button class="t-pill" onclick="insertLink()">🔗 Link</button>
             </div>
-            
-            <div class="tool-section category-box">
-                <select id="category-select" class="tool-select category">
+
+            <div class="t-divider"></div>
+
+            <div class="t-section">
+                <select id="category-select" class="t-select category-highlight">
                     <option value="MATS">MATS</option>
                     <option value="LCyL">LCyL</option>
                     <option value="ING">ING</option>
@@ -75,11 +67,9 @@
             </div>
         </div>
 
-        <div class="editor-canvas">
-            <div class="document-shadow">
-                <input type="text" id="title" class="doc-title" placeholder="Untitled Report..." spellcheck="false">
-                <div id="content" contenteditable="true" class="doc-content" data-placeholder="Start typing your professional report..."></div>
-            </div>
+        <div class="canvas-area">
+            <input type="text" id="title" class="huge-title" placeholder="Untitled Report" autocomplete="off">
+            <div id="content" contenteditable="true" class="pro-writing-area" data-placeholder="Type '/' for commands or start writing..."></div>
         </div>
     </main>
 
@@ -87,19 +77,20 @@
     <script>
         function format(cmd, val = null) {
             document.execCommand(cmd, false, val);
+            document.getElementById('content').focus();
         }
 
         function insertImage() {
-            const url = prompt("Paste Image Link:");
-            if(url) format('insertImage', url);
+            const url = prompt("Paste Image URL:");
+            if (url) format('insertImage', url);
         }
 
         function insertLink() {
-            const url = prompt("URL:");
-            if(url) format('createLink', url);
+            const url = prompt("Enter URL:");
+            if (url) format('createLink', url);
         }
 
-        // Авто-фокус на заголовок
+        // Авто-фокус на заголовок при входе
         window.onload = () => document.getElementById('title').focus();
     </script>
 </body>
