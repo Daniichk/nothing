@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <title>Intelligence Editor | School Press</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>Pro Editor | School Press</title>
 </head>
 <body class="glass-theme editor-page">
     <div class="glass-bg-blobs">
@@ -17,38 +17,69 @@
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
             <div class="auth-group">
-                <button onclick="location.href='index.html'" class="glass-btn">Discard</button>
-                <button onclick="publishArticle()" class="glass-btn btn-primary">Publish Report</button>
+                <button onclick="location.href='index.html'" class="glass-btn">Exit Studio</button>
+                <button onclick="publishArticle()" class="btn-primary">Finalize & Publish</button>
             </div>
         </div>
     </header>
 
-    <main class="content-wrapper">
-        <div class="editor-toolbar-fixed">
-            <div class="tool-group">
-                <button onclick="format('bold')"><b>B</b></button>
-                <button onclick="format('italic')"><i>I</i></button>
-                <button onclick="format('insertUnorderedList')">• List</button>
+    <main class="editor-workspace">
+        <div class="pro-toolbar shadow-premium">
+            <div class="tool-section">
+                <select onchange="format('fontName', this.value)" class="tool-select font-family">
+                    <option value="Plus Jakarta Sans">Sans Serif</option>
+                    <option value="serif">Serif</option>
+                    <option value="JetBrains Mono">Monospace</option>
+                    <option value="Comic Sans MS">Dyslexic Friendly</option>
+                </select>
+                <select onchange="format('fontSize', this.value)" class="tool-select font-size">
+                    <option value="3">Normal</option>
+                    <option value="1">Small</option>
+                    <option value="5">Large</option>
+                    <option value="7">Huge</option>
+                </select>
             </div>
-            <div class="tool-separator"></div>
-            <div class="tool-group">
-                <button onclick="insertImage()">🖼 Image</button>
-                <button onclick="insertLink()">🔗 Link</button>
+
+            <div class="tool-divider"></div>
+
+            <div class="tool-section">
+                <button class="t-btn" onclick="format('bold')" title="Bold"><b>B</b></button>
+                <button class="t-btn" onclick="format('italic')" title="Italic"><i>I</i></button>
+                <button class="t-btn" onclick="format('underline')" title="Underline"><u>U</u></button>
+                <input type="color" onchange="format('foreColor', this.value)" title="Text Color" class="color-picker">
             </div>
-            <div class="tool-separator"></div>
-            <select id="category-select" class="editor-select">
-                <option value="MATS">MATS</option>
-                <option value="LCyL">LCyL</option>
-                <option value="ING">ING</option>
-                <option value="FyQ">FyQ</option>
-                <option value="PE">PE</option>
-                <option value="BIO">BIO</option>
-            </select>
+
+            <div class="tool-divider"></div>
+
+            <div class="tool-section">
+                <button class="t-btn" onclick="format('justifyLeft')">align_left</button>
+                <button class="t-btn" onclick="format('justifyCenter')">align_center</button>
+                <button class="t-btn" onclick="format('insertUnorderedList')">list_bullet</button>
+            </div>
+
+            <div class="tool-divider"></div>
+
+            <div class="tool-section">
+                <button class="t-btn action" onclick="insertImage()">🖼 Image</button>
+                <button class="t-btn action" onclick="insertLink()">🔗 Link</button>
+                <button class="t-btn action" onclick="format('removeFormat')">🧹 Reset</button>
+            </div>
+            
+            <div class="tool-section category-box">
+                <select id="category-select" class="tool-select category">
+                    <option value="MATS">MATS</option>
+                    <option value="LCyL">LCyL</option>
+                    <option value="ING">ING</option>
+                    <option value="FyQ">FyQ</option>
+                </select>
+            </div>
         </div>
 
-        <div class="editor-paper glass-panel">
-            <input type="text" id="title" class="title-input-large" placeholder="Report Title..." spellcheck="false">
-            <div id="content" contenteditable="true" class="writing-area" data-placeholder="Write your intelligence report here..."></div>
+        <div class="editor-canvas">
+            <div class="document-shadow">
+                <input type="text" id="title" class="doc-title" placeholder="Untitled Report..." spellcheck="false">
+                <div id="content" contenteditable="true" class="doc-content" data-placeholder="Start typing your professional report..."></div>
+            </div>
         </div>
     </main>
 
@@ -59,21 +90,17 @@
         }
 
         function insertImage() {
-            const url = prompt("Paste Image URL (or use a placeholder link):");
-            if (url) {
-                format('insertImage', url);
-            }
+            const url = prompt("Paste Image Link:");
+            if(url) format('insertImage', url);
         }
 
         function insertLink() {
-            const url = prompt("Enter link URL:");
-            if (url) format('createLink', url);
+            const url = prompt("URL:");
+            if(url) format('createLink', url);
         }
 
-        // Защита: только залогиненные
-        if (!localStorage.getItem("userNick")) {
-            location.href = 'index.html';
-        }
+        // Авто-фокус на заголовок
+        window.onload = () => document.getElementById('title').focus();
     </script>
 </body>
 </html>
