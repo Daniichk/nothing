@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <title>Profile | School Press</title>
 </head>
 <body class="glass-theme profile-page">
@@ -17,15 +17,15 @@
         <div class="nav-container">
             <div class="logo" onclick="location.href='index.html'">SCHOOL<span>PRESS</span></div>
             <div class="auth-group">
-                <button onclick="location.href='index.html'" class="glass-btn">← Home Feed</button>
-                <button onclick="handleLogout()" class="btn-primary" style="background: #ef4444;">Logout</button>
+                <button onclick="location.href='index.html'" class="glass-btn">Home Feed</button>
+                <button onclick="handleLogout()" class="glass-btn btn-primary" style="background: #ef4444;">Logout</button>
             </div>
         </div>
     </header>
 
     <main class="content-wrapper">
         <section class="profile-hero">
-            <div class="profile-card-large glass-panel">
+            <div class="profile-card-large">
                 <div class="avatar-container">
                     <img id="profile-pic" src="" alt="Avatar">
                     <div class="rank-badge">Contributor</div>
@@ -37,20 +37,22 @@
                     
                     <div class="social-stats">
                         <div class="stat-item">
-                            <span id="total-wires" class="stat-num">0</span>
-                            <span class="stat-label">Total Wires</span>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
                             <span id="post-count" class="stat-num">0</span>
-                            <span class="stat-label">Articles</span>
+                            <span class="stat-label">articles</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="total-wires" class="stat-num">0</span>
+                            <span class="stat-label">wires</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <h3 class="section-title">My Intelligence Reports</h3>
+        <div class="section-title">
+            <span>Grid view</span>
+        </div>
+
         <div id="my-articles-grid" class="cube-grid">
             </div>
     </main>
@@ -58,15 +60,20 @@
     <script src="script.js"></script>
     <script>
         window.onload = () => {
+            // Подключаем проверку авторизации из script.js
+            if (typeof checkAuth === 'function') checkAuth(); 
+
             const nick = localStorage.getItem("userNick");
             const email = localStorage.getItem("userEmail");
             
             if (!nick) return location.href = 'index.html';
 
-            // Настройка профиля
+            // Заполняем инфо профиля
             document.getElementById('display-nick').innerText = `@${nick}`;
-            document.getElementById('display-email').innerText = email || 'Standard Access';
-            document.getElementById('profile-pic').src = `https://ui-avatars.com/api/?name=${nick}&background=2563eb&color=fff&size=200&bold=true`;
+            document.getElementById('display-email').innerText = email || 'Corporate Access';
+            
+            // UI Аватар (или укажи свое фото)
+            document.getElementById('profile-pic').src = `https://ui-avatars.com/api/?name=${nick}&background=2563eb&color=fff&size=300&bold=true`;
 
             loadMyArticles(nick);
         };
@@ -74,6 +81,8 @@
         function loadMyArticles(nick) {
             const articles = JSON.parse(localStorage.getItem("articles") || "[]");
             const myArticles = articles.filter(a => a.author === nick);
+            
+            // Считаем сумму просмотров (WIRES)
             const totalWires = myArticles.reduce((sum, art) => sum + (art.views || 0), 0);
 
             document.getElementById('post-count').innerText = myArticles.length;
@@ -82,31 +91,37 @@
             const grid = document.getElementById('my-articles-grid');
             
             if (myArticles.length === 0) {
-                grid.innerHTML = `<p class="empty-msg">You haven't published any reports yet.</p>`;
+                grid.innerHTML = `<p class="empty-msg">You haven't published any intelligence reports yet.</p>`;
                 return;
             }
 
+            // Рендерим квадратные карточки с оверлеем
             grid.innerHTML = myArticles.map(art => `
-                <div class="cube-card shadow-premium">
-                    <div class="card-header">
-                        <span class="tag">${art.category}</span>
-                        <button class="delete-btn-icon" onclick="deleteArticle(${art.id})" title="Delete Article">×</button>
+                <div class="cube-card shadow-premium" onclick="location.href='article.html?id=${art.id}'">
+                    <button class="delete-btn-icon" onclick="event.stopPropagation(); deleteArticle(${art.id})" title="Delete Article">×</button>
+                    
+                    <div class="card-insta-content">
+                        <div class="card-header">
+                            <span class="tag">${art.category}</span>
+                        </div>
+                        <h3>${art.title}</h3>
                     </div>
-                    <h3 onclick="location.href='article.html?id=${art.id}'" style="cursor:pointer">${art.title}</h3>
-                    <div class="card-footer">
-                        <span>👁 ${art.views || 0} views</span>
-                        <span>❤️ ${art.likes || 0} likes</span>
+
+                    <div class="insta-overlay">
+                        <span>👁 ${art.views || 0}</span>
+                        <span>❤️ ${art.likes || 0}</span>
                     </div>
                 </div>
             `).join('');
         }
 
+        // Кнопка удаления с подтверждением
         function deleteArticle(id) {
-            if (confirm("Are you sure you want to delete this intelligence report? This action cannot be undone.")) {
+            if (confirm("Terminating current intelligence report. Proceed?")) {
                 let articles = JSON.parse(localStorage.getItem("articles") || "[]");
                 articles = articles.filter(a => a.id !== id);
                 localStorage.setItem("articles", JSON.stringify(articles));
-                location.reload();
+                location.reload(); // Перегружаем, чтобы обновить
             }
         }
     </script>
