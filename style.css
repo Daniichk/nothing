@@ -428,3 +428,102 @@ header.glass-nav {
     color: rgba(255,255,255,0.9);
     outline: none;
 }
+/* Макет редактора */
+.editor-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-top: 80px;
+}
+
+/* Навигация (фикс прилипания) */
+.editor-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.save-status {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    font-weight: 500;
+}
+
+/* Панель инструментов (Floating) */
+.floating-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(20px);
+    padding: 8px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 100px;
+    z-index: 100;
+    margin-bottom: 50px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.t-section { display: flex; align-items: center; gap: 4px; }
+.t-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 8px; }
+
+/* Кнопки и выбор */
+.t-btn {
+    width: 32px; height: 32px;
+    background: transparent; border: none;
+    color: white; border-radius: 8px;
+    cursor: pointer; transition: 0.2s;
+}
+
+.t-btn:hover { background: rgba(255,255,255,0.1); }
+
+.t-pill {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white; padding: 6px 12px;
+    border-radius: 8px; font-size: 0.8rem;
+    cursor: pointer; font-weight: 600;
+}
+
+.t-select {
+    background: transparent; border: none;
+    color: rgba(255,255,255,0.7); font-weight: 600;
+    cursor: pointer;
+}
+
+/* Область письма */
+.canvas-area {
+    width: 100%;
+    max-width: 780px;
+    margin-bottom: 200px;
+}
+
+.huge-title {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 4rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 20px;
+    outline: none;
+    letter-spacing: -2px;
+}
+
+.pro-writing-area {
+    min-height: 500px;
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.9);
+    outline: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Плейсхолдер */
+.pro-writing-area:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(255,255,255,0.2);
+}
